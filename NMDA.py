@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import Adafruit_BBIO.UART as UART
 import Adafruit_BBIO.GPIO as GPIO
 import logging
