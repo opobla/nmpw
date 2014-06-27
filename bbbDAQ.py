@@ -4,16 +4,15 @@ import threading
 from time import strftime
 import datetime
 import serial
-#import pymongo
+import pymongo
 
 class Reader(threading.Thread):
-	def __init__(self, port, end_condition, database, collection):
+	def __init__(self, port, end_condition, histo_collection_adapter):
 		threading.Thread.__init__(self)
 		self.name='Reader'
 		self.port=port
 		self.end_condition=end_condition
-		self.database=database
-		self.collection=collection
+		self.histo_collection_adapter=histo_collection_adapter
 
 		self.status='bytex'
 		self.histo_data=[[0 for x in xrange(128)] for x in xrange(18)]
@@ -21,7 +20,9 @@ class Reader(threading.Thread):
 		self.low_events=[0 for x in xrange(18)]
 		self.overflows=[0 for x in xrange(18)]
 	def run(self):
-		while not self.end_condition:
+		now_min=None
+		now_ten_min=None
+		while self.end_condition.is_set():
 			next=self.port.read(1)
 			if not next:
 				break
@@ -62,7 +63,7 @@ class Reader(threading.Thread):
 						entry={	'start_date_time':time_entry,
 							'binTable_incompleto':self.events_min,
 						}
-						if self.database=='shell' or self.collection=='shell':
+						if True: #  TODO
 							print entry
 						else:
 							print ''#this is here just to make compilation posible 
@@ -90,11 +91,10 @@ class Reader(threading.Thread):
 							'low_levels':self.low_events,
 							'overflows':self.overflows,	
 						}
-						if self.database=='shell' or self.collection=='shell':
+						if self.histo_collection_adapter==None:
 							print entry
 						else:
-							print ''#this is here just to make compilation posible 
-							#  TODO Safe to mongodb
+							self.histo_collection_adapter.insert(entry)
 
 						#Clear the saved data
 						self.histo_data=[[0 for x in xrange(128)] for x in xrange(18)]
@@ -111,15 +111,13 @@ class Reader(threading.Thread):
 					self.events_min[channel] +=1
 				
 
-        			print datetime.now().time(),"Ch:",channel,"Pulse type:",pulse_type," Pulse width:",pulse_width_ticks,\
+        			print datetime.datetime.now().time(),"Ch:",channel,"Pulse type:",pulse_type," Pulse width:",pulse_width_ticks,\
                 			float(pulse_width_ticks) / 50.0,"useg"
         			continue
 
 
 
 if __name__=='__main__':
-	end_condition=False
-	
 	#Create the parser
 	parser = argparse.ArgumentParser(description="Launch the python module for the new pulse width core for the neutron monitors.")
 	parser.add_argument('-sp','--serialPort',type=str, required=True, help='The port that will be used to read the data.')
@@ -132,17 +130,50 @@ if __name__=='__main__':
 	#Initialize the Serial Port
 	port=serial.Serial(port=args.serialPort,baudrate=921600)
 	port.flush()
+	port.flushInput()
+
+	#Initialize the Database connection
+	histo_collection_adapter=None
+	if args.database=='shell' or args.collection=='shell':
+		client=pymongo.MongoClient('mongodb://localhost:27017') #  TODO Set as configurable argument?
+		histo_collection_adapter=client[args.database][args.collection]	
+		# TODO histo_collection_adapter.ensureIndex({start_date_time : 1})  #always or do it manually??????????
 
 	#Initialize all threads
-	reader=Reader(port, end_condition, args.database, args.collection)
+	end_condition=threading.Event()
+	end_condition.set()
+	reader=Reader(port, end_condition, histo_collection_adapter)
+	reader.start()
 
-	#Once all is done
-	try:
-		while 1:
-			#Wakes up every sec and checks for Ctrl-C
-			time.sleep(1.0)
-	except KeyboardInterrupt:
+	import signal
+	import sys
+
+	#It looks like the KeyboardInterrupt exception is fired twice!!!!!!!!!!!!!!!!!!!!!!! 
+	#For now this allows us to stop the threads relising the resources
+	def signal_handler(signal, frame):
 		print 'Bye Bye'
-		end_condition=True
+		end_condition.clear()
 		#Join the 3 threads
 		reader.join()
+		port.close()
+		sys.exit(0)
+
+	signal.signal(signal.SIGINT,signal_handler)
+
+	while 1:
+		time.sleep(0.1)
+
+	#Once all is done
+	#try:
+		#while 1:
+			#Wakes up every sec and checks for Ctrl-C
+			#time.sleep(0.1)
+	#except KeyboardInterrupt:
+		#print 'Bye Bye'
+		#end_condition.clear()
+			#Join the 3 threads
+		#reader.join()
+		#port.close()
+		#sys.exit(0)
+
+
