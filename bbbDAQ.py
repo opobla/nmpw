@@ -6,6 +6,29 @@ import datetime
 import serial
 import pymongo
 
+
+class Contadores(threading.Thread):
+	def __init__(self, port, end_condition):
+		threading.Thread.__init__(self)
+		self.name='Contadores'
+		self.port=port
+		self.end_condition=end_condition
+
+	def run(self):
+		now_min=None
+		while self.end_condition.is_set():
+			now=time.time()
+			if now_min==None:
+				now_min=now-now%60
+			else:
+				if now_min+60 < now:
+					#  TODO write in the port requesting the counts....
+					print 'Contadores wake up time: ',now
+					now_min=now-now%60
+
+			#Instead of having the thread sleeping for 60 secs we have it taking short cat naps every sec. This way the thread is more responsive when trying to close it...
+			time.sleep(min(1.0,60-time.time()%60))
+
 class Reader(threading.Thread):
 	def __init__(self, port, end_condition, histo_collection_adapter):
 		threading.Thread.__init__(self)
@@ -134,7 +157,7 @@ if __name__=='__main__':
 
 	#Initialize the Database connection
 	histo_collection_adapter=None
-	if args.database=='shell' or args.collection=='shell':
+	if args.database!='shell' and  args.collection!='shell':
 		client=pymongo.MongoClient('mongodb://localhost:27017') #  TODO Set as configurable argument?
 		histo_collection_adapter=client[args.database][args.collection]	
 		# TODO histo_collection_adapter.ensureIndex({start_date_time : 1})  #always or do it manually??????????
@@ -143,7 +166,9 @@ if __name__=='__main__':
 	end_condition=threading.Event()
 	end_condition.set()
 	reader=Reader(port, end_condition, histo_collection_adapter)
+	contadores=Contadores(port,end_condition)
 	reader.start()
+	contadores.start()
 
 	import signal
 	import sys
@@ -153,27 +178,12 @@ if __name__=='__main__':
 	def signal_handler(signal, frame):
 		print 'Bye Bye'
 		end_condition.clear()
-		#Join the 3 threads
-		reader.join()
-		port.close()
-		sys.exit(0)
-
 	signal.signal(signal.SIGINT,signal_handler)
 
-	while 1:
-		time.sleep(0.1)
+	while end_condition.is_set():
+		time.sleep(100000000000)
 
-	#Once all is done
-	#try:
-		#while 1:
-			#Wakes up every sec and checks for Ctrl-C
-			#time.sleep(0.1)
-	#except KeyboardInterrupt:
-		#print 'Bye Bye'
-		#end_condition.clear()
-			#Join the 3 threads
-		#reader.join()
-		#port.close()
-		#sys.exit(0)
-
+	reader.join()
+	contadores.join()
+	port.close()
 
