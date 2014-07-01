@@ -26,7 +26,7 @@ class Reader(threading.Thread):
 			if not next:
 				break
 	
-			#------------------Overflowsss
+			#------------------Overflows
 			if ((ord(next[0]) & 0b11000000)== 0b00000000):
 				self.status='Ovbyte1'
 				if channel_counts!=None:

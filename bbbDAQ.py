@@ -54,5 +54,5 @@ if __name__=='__main__':
 		time.sleep(100000000000)
 
 	reader.join()
-	contadores.join()
+	contadores._Thread__stop()
 	port.close()

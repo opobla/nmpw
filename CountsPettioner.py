@@ -1,7 +1,7 @@
 import time
 import threading
 from time import strftime
-
+from threading import Thread
 
 class CountsPettioner(threading.Thread):
 	def __init__(self, port, end_condition):
@@ -19,10 +19,11 @@ class CountsPettioner(threading.Thread):
 			else:
 				if now_min+60 < now:
 					#  TODO write in the port requesting the counts....
-					print 'Contadores wake up time: ',now
+					#  TODO wait for the Reader to read the data
+					#  TODO write the data into the database
+					print 'CountsPettioner wake up time: ',now
 					now_min=now-now%60
+				else:
+					print 'The thread have woke up earlier, this shouldnt happend and this code is just to check... '
 
-			#Instead of having the thread sleeping for 60 secs we have it taking short cat naps every sec. This way the thread is more responsive when trying to close it...
-			time.sleep(min(1.0,60-time.time()%60))
-			#  TODO Sleep 60 secs and kill this thread when exiting
-
+			time.sleep(60.0-time.time()%60)
