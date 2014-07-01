@@ -2,6 +2,7 @@ import time
 import threading
 from time import strftime
 import datetime
+import operator
 
 class Reader(threading.Thread):
 	def __init__(self, port, end_condition, histo_collection_adapter):
@@ -31,18 +32,24 @@ class Reader(threading.Thread):
 				if channel_counts!=None:
 					channel_counts=None
 					#  TODO Something went wrong reading the Counts
-				#  TODO Read infor from rest of byte
+				overflow=[0 for x in xrange(18)]
+				overflow[0:6]=[int(x) for x in '{0:06b}'.format(ord(next[0]) & 0b00111111)[::-1]]
 				continue
 
 			if self.status=='Ovbyte1' and ((ord(next[0]) & 0b10000000) == 0b10000000):
 				self.status='Ovbyte2'
-				#  TODO Read infor from rest of byte
+				overflow[6:13]=[int(x) for x in '{0:07b}'.format(ord(next[0]) & 0b01111111)[::-1]]
 				continue
 
 			if self.status=='Ovbyte2' and ((ord(next[0]) & 0b10000000) == 0b10000000):
 				self.status='bytex'
-				#  TODO Read infor from rest of byte
-				#  TODO update self.overflows
+				overflow[13:]=[int(x) for x in '{0:05b}'.format(ord(next[0]) & 0b00011111)[::-1]]
+				overflow_general=(ord(next[0]) & 0b00100000) >> 5
+				overflow_almost_full=(ord(next[0]) & 0b01000000) >> 6
+	
+				print 'Yo man overflow: ',overflow
+				self.overflows=map(operator.add, self.overflows, overflow)
+				#  TODO Decide what do with the overflow_general and almost_full data...
 				continue
 		
 			#----------------Pulse Widths
@@ -132,6 +139,7 @@ class Reader(threading.Thread):
 
 
 				#----------------Counts
+				print 'El estado es: ',self.status
 				if ((ord(next[0]) & 0b11100000) == 0b01100000):
 					self.status='Contbyte3'
 					if channel_counts!=None:
