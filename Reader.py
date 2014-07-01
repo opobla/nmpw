@@ -19,20 +19,38 @@ class Reader(threading.Thread):
 	def run(self):
 		now_min=None
 		now_ten_min=None
+		channel_counts=None
 		while self.end_condition.is_set():
 			next=self.port.read(1)
 			if not next:
 				break
+	
+			#------------------Overflowsss
+			if ((ord(next[0]) & 0b11000000)== 0b00000000):
+				self.status='Ovbyte1'
+				if channel_counts!=None:
+					channel_counts=None
+					#  TODO Something went wrong reading the Counts
+				#  TODO Read infor from rest of byte
+				continue
 
-			if ((ord(next[0]) & 0b11000000) == 0b00000000):
-        			self.status="bytex"
-        			print 'OVERFLOW'
-				#  TODO Read 2 more bytes and update the self.overflow
-				#  TODO Add more states to handle correctly overflows data.
-        			continue
+			if self.status=='Ovbyte1' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+				self.status='Ovbyte2'
+				#  TODO Read infor from rest of byte
+				continue
 
+			if self.status=='Ovbyte2' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+				self.status='bytex'
+				#  TODO Read infor from rest of byte
+				#  TODO update self.overflows
+				continue
+		
+			#----------------Pulse Widths
     			if ((ord(next[0]) & 0b11100000) == 0b01000000):
         			self.status="byte1"
+				if channel_counts!=None:
+					channel_counts=None
+					#  TODO Something went wrong reading the Counts
         			channel=ord(next[0]) & 0b00011111
         			continue
 
@@ -42,7 +60,7 @@ class Reader(threading.Thread):
         			continue
 
     			if self.status=="byte2" and ((ord(next[0]) & 0b10000000) == 0b10000000):
-        			self.status="byte3"
+        			self.status="bytex"
         			count711=ord(next[0]) & 0b00011111
         			pulse_type=(ord(next[0]) & 0b00100000) >> 5
         			pulse_width_ticks=count06 + (count711 << 7)
@@ -111,5 +129,48 @@ class Reader(threading.Thread):
         			print datetime.datetime.now().time(),"Ch:",channel,"Pulse type:",pulse_type," Pulse width:",pulse_width_ticks,\
                 			float(pulse_width_ticks) / 50.0,"useg"
         			continue
+
+
+				#----------------Counts
+				if ((ord(next[0]) & 0b11100000) == 0b01100000):
+					self.status='Contbyte3'
+					if channel_counts!=None:
+						print '' #This is here just to make compilation possible
+						#  TODO Somethong went wrong reading the Counts
+					channel_counts=0
+					continue
+
+				if self.status=='ContByte3' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+					self.status='Contbyte1'
+					#  TODO Read infor from rest of byte
+					continue
+
+				if self.status=='Contbyte1' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+					slef.status='Contbyte2'
+					#  TODO Read infor from rest of byte
+					continue
+
+				if self.status=='Contbyte2' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+					self.status='Contbyte3'
+					#  TODO Save the conts
+					if counts==17:
+						#  TODO Write the Counts to the satabase
+						channel_counts=None
+						self.status='bytex'
+					else:
+						channel_counts +=1
+					continue
+
+
+
+				#--------Error, we have received something that wasnt expected
+				if channel_counts!=None:
+					print ''#this is here just to make compilation posible 
+					#  TODO Somethong went wrong reading the Counts
+				self.status='butex'
+				#  TODO maybe restart all the varibles {channel_counts}
+				print 'Yo man, something went wrong'
+
+
 
 
