@@ -160,21 +160,18 @@ class Reader(threading.Thread):
 			if self.status=='Contbyte1' and ((ord(next[0]) & 0b10000000) == 0b10000000):
 				self.status='Contbyte2'
 				counts_val=counts_val+((ord(next[0]) & 0b01111111) << 7)
-				#  TODO Read infor from rest of byte
 				continue
 
 			if self.status=='Contbyte2' and ((ord(next[0]) & 0b10000000) == 0b10000000):
 				self.status='Contbyte3'
 				counts_val=counts_val+((ord(next[0]) & 0b00000011) << 14)
 				counts_values[channel_counts]=counts_val
-				#  TODO Save the conts
 				if channel_counts==17:
 					self.counts_condition.acquire()
-					#  TODO write into the shared data	
+					self.shared_counts_data[:]=counts_values[:]
 					self.counts_condition.notify()
 					self.counts_condition.release()
-					print 'Lolz well done'
-					print counts_values
+
 					channel_counts=None
 					self.status='bytex'
 				else:

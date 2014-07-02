@@ -15,7 +15,8 @@ if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Launch the python module for the new pulse width core for the neutron monitors.")
 	parser.add_argument('-sp','--serialPort',type=str, required=True, help='The port that will be used to read the data.')
 	parser.add_argument('-db','--database',type=str,default='shell',help='The database where the data will be stored, by default the data will be printed on the shell.')
-	parser.add_argument('-c','--collection',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
+	parser.add_argument('-ch','--collectionHistograms',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
+	parser.add_argument('-cc','--collectionCounts',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
 
 	#Parse the arguments
 	args=parser.parse_args()
@@ -27,10 +28,15 @@ if __name__=='__main__':
 
 	#Initialize the Database connection
 	histo_collection_adapter=None
-	if args.database!='shell' and  args.collection!='shell':
+	counts_min_adapter=None
+	if args.database!='shell' and  args.collectionHistograms!='shell':
 		client=pymongo.MongoClient('mongodb://localhost:27017') #  TODO Set as configurable argument?
-		histo_collection_adapter=client[args.database][args.collection]	
+		histo_collection_adapter=client[args.database][args.collectionHistograms]	
+	if args.database!='shell' and  args.collectionCounts!='shell':
+		client=pymongo.MongoClient('mongodb://localhost:27017') #  TODO Set as configurable argument?
+		counts_min_adapter=client[args.database][args.collectionCounts]	
 		# TODO histo_collection_adapter.ensureIndex({start_date_time : 1})  #always or do it manually??????????
+		# TODO counts_min_adapter.ensureIndex({start_date_time : 1})  #always or do it manually??????????
 
 	#Initialize all threads
 	end_condition=threading.Event()
@@ -38,7 +44,7 @@ if __name__=='__main__':
 	counts_condition=threading.Condition()
 	shared_counts_data=[]
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, histo_collection_adapter)
-	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data)
+	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, counts_min_adapter)
 	reader.start()
 	contadores.start()
 
