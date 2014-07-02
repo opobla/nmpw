@@ -148,20 +148,25 @@ class Reader(threading.Thread):
 					print '' #This is here just to make compilation possible
 					#  TODO Somethong went wrong reading the Counts
 				channel_counts=0
+				counts_val=0
+				counts_values=[0 for x in xrange(18)]
 				continue
 
 			if self.status=='Contbyte3' and ((ord(next[0]) & 0b10000000) == 0b10000000):
 				self.status='Contbyte1'
-				#  TODO Read infor from rest of byte
+				counts_val=ord(next[0]) & 0b01111111
 				continue
 
 			if self.status=='Contbyte1' and ((ord(next[0]) & 0b10000000) == 0b10000000):
 				self.status='Contbyte2'
+				counts_val=counts_val+((ord(next[0]) & 0b01111111) << 7)
 				#  TODO Read infor from rest of byte
 				continue
 
 			if self.status=='Contbyte2' and ((ord(next[0]) & 0b10000000) == 0b10000000):
 				self.status='Contbyte3'
+				counts_val=counts_val+((ord(next[0]) & 0b00000011) << 14)
+				counts_values[channel_counts]=counts_val
 				#  TODO Save the conts
 				if channel_counts==17:
 					self.counts_condition.acquire()
@@ -169,6 +174,7 @@ class Reader(threading.Thread):
 					self.counts_condition.notify()
 					self.counts_condition.release()
 					print 'Lolz well done'
+					print counts_values
 					channel_counts=None
 					self.status='bytex'
 				else:
