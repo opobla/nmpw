@@ -5,13 +5,13 @@ import datetime
 import operator
 
 class Reader(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, histo_collection_adapter):
+	def __init__(self, port, end_condition, counts_condition, shared_counts_data, histo_collection_adapter):
 		threading.Thread.__init__(self)
 		self.name='Reader'
 		self.port=port
 		self.end_condition=end_condition
 		self.counts_condition=counts_condition
-		slef.shared_counts_data=shared_counts_data
+		self.shared_counts_data=shared_counts_data
 		self.histo_collection_adapter=histo_collection_adapter
 
 		self.status='bytex'
