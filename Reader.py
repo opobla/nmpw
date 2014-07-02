@@ -5,11 +5,13 @@ import datetime
 import operator
 
 class Reader(threading.Thread):
-	def __init__(self, port, end_condition, histo_collection_adapter):
+	def __init__(self, port, end_condition, counts_condition, histo_collection_adapter):
 		threading.Thread.__init__(self)
 		self.name='Reader'
 		self.port=port
 		self.end_condition=end_condition
+		self.counts_condition=counts_condition
+		slef.shared_counts_data=shared_counts_data
 		self.histo_collection_adapter=histo_collection_adapter
 
 		self.status='bytex'
@@ -162,7 +164,10 @@ class Reader(threading.Thread):
 				self.status='Contbyte3'
 				#  TODO Save the conts
 				if channel_counts==17:
-					#  TODO Write the Counts to the satabase
+					self.counts_condition.acquire()
+					#  TODO write into the shared data	
+					self.counts_condition.notify()
+					self.counts_condition.release()
 					print 'Lolz well done'
 					channel_counts=None
 					self.status='bytex'
