@@ -17,8 +17,8 @@ class CountsPettioner(threading.Thread):
 			if now_min==None:
 				now_min=now-now%60
 			else:
-				if now_min+60 < now:
-					#  TODO write in the port requesting the counts....
+				if now_min+60 < now:   
+					self.port.write(chr(17)) #0x11
 					#  TODO wait for the Reader to read the data
 					#  TODO write the data into the database
 					print 'CountsPettioner wake up time: ',now

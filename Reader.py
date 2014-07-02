@@ -138,46 +138,47 @@ class Reader(threading.Thread):
         			continue
 
 
-				#----------------Counts
-				print 'El estado es: ',self.status
-				if ((ord(next[0]) & 0b11100000) == 0b01100000):
-					self.status='Contbyte3'
-					if channel_counts!=None:
-						print '' #This is here just to make compilation possible
-						#  TODO Somethong went wrong reading the Counts
-					channel_counts=0
-					continue
-
-				if self.status=='ContByte3' and ((ord(next[0]) & 0b10000000) == 0b10000000):
-					self.status='Contbyte1'
-					#  TODO Read infor from rest of byte
-					continue
-
-				if self.status=='Contbyte1' and ((ord(next[0]) & 0b10000000) == 0b10000000):
-					slef.status='Contbyte2'
-					#  TODO Read infor from rest of byte
-					continue
-
-				if self.status=='Contbyte2' and ((ord(next[0]) & 0b10000000) == 0b10000000):
-					self.status='Contbyte3'
-					#  TODO Save the conts
-					if counts==17:
-						#  TODO Write the Counts to the satabase
-						channel_counts=None
-						self.status='bytex'
-					else:
-						channel_counts +=1
-					continue
-
-
-
-				#--------Error, we have received something that wasnt expected
+			#----------------Counts
+			if ((ord(next[0]) & 0b11100000) == 0b01100000):
+				self.status='Contbyte3'
+				print 'Counts transmision started...'
 				if channel_counts!=None:
-					print ''#this is here just to make compilation posible 
+					print '' #This is here just to make compilation possible
 					#  TODO Somethong went wrong reading the Counts
-				self.status='butex'
-				#  TODO maybe restart all the varibles {channel_counts}
-				print 'Yo man, something went wrong'
+				channel_counts=0
+				continue
+
+			if self.status=='Contbyte3' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+				self.status='Contbyte1'
+				#  TODO Read infor from rest of byte
+				continue
+
+			if self.status=='Contbyte1' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+				self.status='Contbyte2'
+				#  TODO Read infor from rest of byte
+				continue
+
+			if self.status=='Contbyte2' and ((ord(next[0]) & 0b10000000) == 0b10000000):
+				self.status='Contbyte3'
+				#  TODO Save the conts
+				if channel_counts==17:
+					#  TODO Write the Counts to the satabase
+					print 'Lolz well done'
+					channel_counts=None
+					self.status='bytex'
+				else:
+					channel_counts +=1
+				continue
+
+
+
+			#--------Error, we have received something that wasnt expected
+			if channel_counts!=None:
+				print ''#this is here just to make compilation posible 
+				#  TODO Somethong went wrong reading the Counts
+			self.status='bytex'
+			#  TODO maybe restart all the varibles {channel_counts}
+			print 'Yo man, something went wrong'
 
 
 
