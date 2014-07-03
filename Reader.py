@@ -5,20 +5,24 @@ import datetime
 import operator
 
 class Reader(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts_data, histo_collection_adapter):
+	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data):
 		threading.Thread.__init__(self)
 		self.name='Reader'
 		self.port=port
 		self.end_condition=end_condition
 		self.counts_condition=counts_condition
 		self.shared_counts_data=shared_counts_data
-		self.histo_collection_adapter=histo_collection_adapter
+		self.shared_events_data=shared_events_data
 
 		self.status='bytex'
 		self.histo_data=[[0 for x in xrange(128)] for x in xrange(18)]
 		self.events_min=[0 for x in xrange(18)]
 		self.low_events=[0 for x in xrange(18)]
 		self.overflows=[0 for x in xrange(18)]
+
+
+		self.shared_events_data[:]=[[0 for x in xrange(18)],[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
+		
 	def run(self):
 		now_min=None
 		now_ten_min=None
@@ -50,7 +54,7 @@ class Reader(threading.Thread):
 				overflow_almost_full=(ord(next[0]) & 0b01000000) >> 6
 	
 				print 'Yo man overflow: ',overflow
-				self.overflows=map(operator.add, self.overflows, overflow)
+				self.shared_events_data[2][:]=map(operator.add, self.shared_events_data[2],overflow)
 				#  TODO Decide what do with the overflow_general and almost_full data...
 				continue
 		
@@ -76,63 +80,15 @@ class Reader(threading.Thread):
 
 				now=time.time()
 				
-				#  TODO Do we want events per minute. With overflows evets can be lost. Its more reliable to use the data generated from the FPGA?
-				#Events per minute
-        			if now_min==None:
-            				now_min=now-now%60
-        			else:
-            				if now_min+60 < now:
-						#  TODO Decide if we want low level pulses every min or 10mins
-						time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
-						entry={	'start_date_time':time_entry,
-							'binTable_incompleto':self.events_min,
-						}
-						if True: #  TODO
-							print entry
-						else:
-							print ''#this is here just to make compilation posible 
-							#  TODO Safe to mongodb
-
-						#Clear the saved data
-						self.events_min=[0 for x in xrange(18)]
-
-						#Update the interval
-            					now_min=now-now%60
 				
-				#Histograms every ten minutes
-				if now_ten_min==None:
-            				now_ten_min=now-now%600
-        			else:
-            				if now_ten_min+600 < now:
-						#  TODO Decide if we want low level pulses every min or 10mins
-						time_entry=datetime.datetime.fromtimestamp(now_ten_min).strftime('%Y-%m-%d %H:%M:%S')
-						#Considerar secuencia de eventos
-						#Minuto Nuevo >> Overflow >> Overflow >> Correct data
-						#Tendriamos dos overflow que no pertenecen al minuto..
-						#Es algo con lo que podemos vivir?
-						entry={	'start_date:time':time_entry,
-							'histogram':self.histo_data,
-							'low_levels':self.low_events,
-							'overflows':self.overflows,	
-						}
-						if self.histo_collection_adapter==None:
-							print entry
-						else:
-							self.histo_collection_adapter.insert(entry)
-
-						#Clear the saved data
-						self.histo_data=[[0 for x in xrange(128)] for x in xrange(18)]
-						self.low_events=[0 for x in xrange(18)]
-						self.overflows=[0 for x in xrange(18)]
-
-						#Update the interval
-            					now_ten_min=now-now%600
-
 				if pulse_type==0:
-					self.low_events[channel] +=1
+					#self.low_events[channel] +=1
+					self.shared_events_data[2][channel] +=1
 				if pulse_type==1:
-					self.histo_data[channel][pulse_width_ticks>>5] +=1
-					self.events_min[channel] +=1
+					#self.histo_data[channel][pulse_width_ticks>>5] +=1
+					self.shared_events_data[1][channel][pulse_width_ticks>>5] +=1
+					#self.events_min[channel] +=1
+					self.shared_events_data[0][channel] +=1
 				
 
         			print datetime.datetime.now().time(),"Ch:",channel,"Pulse type:",pulse_type," Pulse width:",pulse_width_ticks,\

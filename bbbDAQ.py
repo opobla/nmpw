@@ -41,10 +41,13 @@ if __name__=='__main__':
 	#Initialize all threads
 	end_condition=threading.Event()
 	end_condition.set()
+
 	counts_condition=threading.Condition()
 	shared_counts_data=[]
-	reader=Reader(port, end_condition, counts_condition, shared_counts_data, histo_collection_adapter)
-	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, counts_min_adapter)
+	shared_events_data=[]
+
+	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
+	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, counts_min_adapter, histo_collection_adapter)
 	reader.start()
 	contadores.start()
 
