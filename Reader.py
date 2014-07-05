@@ -54,7 +54,7 @@ class Reader(threading.Thread):
 				overflow_almost_full=(ord(next[0]) & 0b01000000) >> 6
 	
 				print 'Yo man overflow: ',overflow
-				self.shared_events_data[2][:]=map(operator.add, self.shared_events_data[2],overflow)
+				self.shared_events_data[3][:]=map(operator.add, self.shared_events_data[3],overflow)
 				#  TODO Decide what do with the overflow_general and almost_full data...
 				continue
 		

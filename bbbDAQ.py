@@ -4,7 +4,8 @@ import threading
 from time import strftime
 import datetime
 import serial
-import pymongo
+#import pymongo
+import sqlite3
 
 from Reader import Reader
 from CountsPettioner import CountsPettioner
@@ -15,8 +16,8 @@ if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Launch the python module for the new pulse width core for the neutron monitors.")
 	parser.add_argument('-sp','--serialPort',type=str, required=True, help='The port that will be used to read the data.')
 	parser.add_argument('-db','--database',type=str,default='shell',help='The database where the data will be stored, by default the data will be printed on the shell.')
-	parser.add_argument('-ch','--collectionHistograms',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
-	parser.add_argument('-cc','--collectionCounts',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
+	#parser.add_argument('-ch','--collectionHistograms',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
+	#parser.add_argument('-cc','--collectionCounts',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
 
 	#Parse the arguments
 	args=parser.parse_args()
@@ -27,16 +28,62 @@ if __name__=='__main__':
 	port.flushInput()
 
 	#Initialize the Database connection
-	histo_collection_adapter=None
-	counts_min_adapter=None
-	if args.database!='shell' and  args.collectionHistograms!='shell':
-		client=pymongo.MongoClient('mongodb://localhost:27017') #  TODO Set as configurable argument?
-		histo_collection_adapter=client[args.database][args.collectionHistograms]	
-	if args.database!='shell' and  args.collectionCounts!='shell':
-		client=pymongo.MongoClient('mongodb://localhost:27017') #  TODO Set as configurable argument?
-		counts_min_adapter=client[args.database][args.collectionCounts]	
-		# TODO histo_collection_adapter.ensureIndex({start_date_time : 1})  #always or do it manually??????????
-		# TODO counts_min_adapter.ensureIndex({start_date_time : 1})  #always or do it manually??????????
+	conn=None
+	if args.database!='shell':
+		conn = sqlite3.connect(args.database, check_same_thread=False)
+		conn.execute("CREATE TABLE IF NOT EXISTS 'binTable' (\
+					'start_date_time' datetime NOT NULL,\
+					 'ch01' int(11) DEFAULT NULL,\
+					 'ch02' int(11) DEFAULT NULL,\
+					 'ch03' int(11) DEFAULT NULL,\
+					 'ch04' int(11) DEFAULT NULL,\
+					 'ch05' int(11) DEFAULT NULL,\
+					 'ch06' int(11) DEFAULT NULL,\
+					 'ch07' int(11) DEFAULT NULL,\
+					 'ch08' int(11) DEFAULT NULL,\
+					 'ch09' int(11) DEFAULT NULL,\
+					 'ch10' int(11) DEFAULT NULL,\
+					 'ch11' int(11) DEFAULT NULL,\
+					 'ch12' int(11) DEFAULT NULL,\
+					 'ch13' int(11) DEFAULT NULL,\
+					 'ch14' int(11) DEFAULT NULL,\
+					 'ch15' int(11) DEFAULT NULL,\
+					 'ch16' int(11) DEFAULT NULL,\
+					 'ch17' int(11) DEFAULT NULL,\
+					 'ch18' int(11) DEFAULT NULL,\
+					 'hv1' int(11) DEFAULT NULL,\
+					 'hv2' int(11) DEFAULT NULL,\
+					 'hv3' int(11) DEFAULT NULL,\
+					 'temp_1' int(11) DEFAULT NULL,\
+					 'temp_2' int(11) DEFAULT NULL,\
+					 'atmPressure' int(11) DEFAULT NULL,\
+					 PRIMARY KEY ('start_date_time')\
+		)")
+
+		conn.execute("CREATE TABLE IF NOT EXISTS 'EventsInfo10Mins'(\
+					'start_date_time' datetime NOT NULL,\
+					'overflows' TEXT DEFAULT NULL,\
+					'lowLevels' TEXT DEFAULT NULL,\
+					'ch01Histo' TEXT DEFAULT NULL,\
+					'ch02Histo' TEXT DEFAULT NULL,\
+					'ch03Histo' TEXT DEFAULT NULL,\
+					'ch04Histo' TEXT DEFAULT NULL,\
+					'ch05Histo' TEXT DEFAULT NULL,\
+					'ch06Histo' TEXT DEFAULT NULL,\
+					'ch07Histo' TEXT DEFAULT NULL,\
+					'ch08Histo' TEXT DEFAULT NULL,\
+					'ch09Histo' TEXT DEFAULT NULL,\
+					'ch10Histo' TEXT DEFAULT NULL,\
+					'ch11Histo' TEXT DEFAULT NULL,\
+					'ch12Histo' TEXT DEFAULT NULL,\
+					'ch13Histo' TEXT DEFAULT NULL,\
+					'ch14Histo' TEXT DEFAULT NULL,\
+					'ch15Histo' TEXT DEFAULT NULL,\
+					'ch16Histo' TEXT DEFAULT NULL,\
+					'ch17Histo' TEXT DEFAULT NULL,\
+					'ch18Histo' TEXT DEFAULT NULL,\
+					PRIMARY KEY ('start_date_time')\
+		)")
 
 	#Initialize all threads
 	end_condition=threading.Event()
@@ -47,7 +94,7 @@ if __name__=='__main__':
 	shared_events_data=[]
 
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
-	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, counts_min_adapter, histo_collection_adapter)
+	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn)
 	reader.start()
 	contadores.start()
 
@@ -64,6 +111,7 @@ if __name__=='__main__':
 	while end_condition.is_set():
 		time.sleep(100000000000)
 
+	conn.close()
 	reader.join()
 	contadores._Thread__stop()
 	port.close()
