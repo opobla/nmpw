@@ -2,6 +2,7 @@ import threading
 from threading import Thread
 import Adafruit_BBIO.GPIO as GPIO
 import time
+from datetime import datetime
 
 
 class ap1(threading.Thread):
@@ -29,6 +30,6 @@ class ap1(threading.Thread):
 		self.ap1_init_strobe_reader()
 		while self.end_condition.is_set():
 			self.shared_pressure_data=self.ap1_read_pressure_using_strobe()
-			print self.shared_pressure_data
+			print datetime.now().time(),'Medida:',self.shared_pressure_data
 			#wake up at hh.mm.30
 			time.sleep((60.0-time.time()%60.0)+30.0)
