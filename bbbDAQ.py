@@ -9,6 +9,7 @@ import sqlite3
 
 from Reader import Reader
 from CountsPettioner import CountsPettioner
+from ap1 import ap1
 
 
 if __name__=='__main__':
@@ -16,6 +17,8 @@ if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Launch the python module for the new pulse width core for the neutron monitors.")
 	parser.add_argument('-sp','--serialPort',type=str, required=True, help='The port that will be used to read the data.')
 	parser.add_argument('-db','--database',type=str,default='shell',help='The database where the data will be stored, by default the data will be printed on the shell.')
+	parser.add_argument('-bm','--barometer',type=str,default=None,help='The barometer used for the pressure measurement')
+	parser.add_argument('-spb','--serialPortBar',type=str,default=None,help='The port the barometer will use to to deliver the data')
 	#parser.add_argument('-ch','--collectionHistograms',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
 	#parser.add_argument('-cc','--collectionCounts',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
 
@@ -92,11 +95,17 @@ if __name__=='__main__':
 	counts_condition=threading.Condition()
 	shared_counts_data=[]
 	shared_events_data=[]
+	shared_pressure_data=None
+	
 
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
 	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn)
+	barometer=init_barometer(args.barometer, end_condition, shared_pressure_data, args.serialPortBar)
+		
 	reader.start()
 	contadores.start()
+	if barometer!=None:
+		barometer['barometer'].start()
 
 	import signal
 	import sys
@@ -114,4 +123,27 @@ if __name__=='__main__':
 	conn.close()
 	reader.join()
 	contadores._Thread__stop()
+	if barometer!=None:
+		barometer['barometer']._Thread__stop()
 	port.close()
+	if 'port' in barometer:
+		barometer['port'].close()
+
+@staticmethod
+def init_barometer(barometer_arg, end_condition, shared_pressure_data, port_arg):
+	return {
+        	'ap1': init_ap1(end_condition, shared_pressure_data),
+        	'bm35': None,  #  TODO
+        }.get(barometer_arg, None)  # The dafault value to return
+	
+@staticmethod
+def init_ap1(end_condition, shared_pressure_data):
+	ap1_bar=ap1(end_conditio, shared_pressure_data)
+	return {'barometer':ap_1}
+
+@staticmethod
+def init_bm35(end_conditio, shared_pressure_data, port_arg):
+	#  TODO init the port that will read the data
+	#  TODO init the thread itself and return it
+	#  return {'barometer':bm35_bar, 'port': the_press_port}	
+	print '' # just to make compilation posible
