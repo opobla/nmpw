@@ -5,11 +5,12 @@ from threading import Thread
 import datetime
 import json
 #import sqlite3
+import copy
 
 class CountsPettioner(threading.Thread):
 	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter):
 		threading.Thread.__init__(self)
-		self.name='Contadores'
+		self.name='CountsPettioner'
 		self.port=port
 		self.end_condition=end_condition
 		self.counts_condition=counts_condition
@@ -22,23 +23,65 @@ class CountsPettioner(threading.Thread):
 	def aux (array_to_json):
 		b=json.dumps(array_to_json)
 		return b 
+
+	#return a copy of the argument and resets he argument
+	@staticmethod
+	def copy_and_reset(data, bool_all):
+		events_data=copy.deepcopy(data)
+		if bool_all:
+			CountsPettioner.reset_to_0(data)
+		else:
+			CountsPettioner.reset_to_0(data[0]) #  TODO change to data['CountsFromEvents']
+		return events_data
+
 	
+	@staticmethod
+	def reset_to_0(the_array):
+    		for i, e in enumerate(the_array):
+        		if isinstance(e, list):
+            			CountsPettioner.reset_to_0(e)
+        		else:
+            			the_array[i] = 0
+			
+
+	@staticmethod
+	def save_BinTable(database,now_min,binTable):
+		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
+		if database==None:
+			print 'start_date_time:',time_entry,'Counts:',binTable
+		else:
+			sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18) values ('"+time_entry+"', "+`binTable[0]`+", "+`binTable[1]`+", "+`binTable[2]`+", "+`binTable[3]`+", "+`binTable[4]`+", "+`binTable[5]`+", "+`binTable[6]`+", "+`binTable[7]`+", "+`binTable[8]`+", "+`binTable[9]`+", "+`binTable[10]`+", "+`binTable[11]`+", "+`binTable[12]`+", "+`binTable[13]`+", "+`binTable[14]`+", "+`binTable[15]`+", "+`binTable[16]`+", "+`binTable[17]`+")"
+			database.execute(sql)
+			database.commit()
+
+	@staticmethod
+	def save_EventsInfo(database,now_min,events_data):
+		time_entry=datetime.datetime.fromtimestamp(now_min-540).strftime('%Y-%m-%d %H:%M:%S')
+		if database==None:
+			print 'start_date_time:',time_entry,'\nhistograms:',events_data[1],'\nlowlevels:',events_data[2],'\noverflows:',events_data[3]
+		else:
+			sql="insert into EventsInfo10Mins (start_date_time, overflows, lowLevels, ch01Histo, ch02Histo, ch03Histo, ch04Histo, ch05Histo, ch06Histo, ch07Histo, ch08Histo, ch09Histo, ch10Histo, ch11Histo, ch12Histo, ch13Histo, ch14Histo, ch15Histo, ch16Histo, ch17Histo, ch18Histo) values ('"+time_entry+"', '"+CountsPettioner.aux(events_data[3])+"', '"+CountsPettioner.aux(events_data[2])+"', '"+CountsPettioner.aux(events_data[1][0])+"', '"+CountsPettioner.aux(events_data[1][1])+"', '"+CountsPettioner.aux(events_data[1][2])+"', '"+CountsPettioner.aux(events_data[1][3])+"', '"+CountsPettioner.aux(events_data[1][4])+"', '"+CountsPettioner.aux(events_data[1][5])+"', '"+CountsPettioner.aux(events_data[1][6])+"', '"+CountsPettioner.aux(events_data[1][7])+"', '"+CountsPettioner.aux(events_data[1][8])+"', '"+CountsPettioner.aux(events_data[1][9])+"', '"+CountsPettioner.aux(events_data[1][10])+"', '"+CountsPettioner.aux(events_data[1][11])+"', '"+CountsPettioner.aux(events_data[1][12])+"', '"+CountsPettioner.aux(events_data[1][13])+"', '"+CountsPettioner.aux(events_data[1][14])+"', '"+CountsPettioner.aux(events_data[1][15])+"', '"+CountsPettioner.aux(events_data[1][16])+"', '"+CountsPettioner.aux(events_data[1][17])+"')"
+			database.execute(sql)
+			database.commit()
+
+
+	@staticmethod
+	def get_min(the_time):
+		return the_time-the_time%60
+
+
+
 	def run(self):
 		now_min=None
 		while self.end_condition.is_set():
 			now=time.time()
 			if now_min==None:
-				now_min=now-now%60
+				now_min=self.get_min(now)
 			else:
 				if now_min+60 < now:   
 						#acquire--release blocks executes atomicly.
 					self.counts_condition.acquire()
-
-					#Get Events data
-					events_data=[self.shared_events_data[0][:],[x[:] for x in self.shared_events_data[1]],self.shared_events_data[2][:],self.shared_events_data[3][:]]
-					self.shared_events_data[0][:]=[0 for x in xrange(18)]
-					if now_min%600==0:
-						self.shared_events_data[:]=[[0 for x in xrange(18)],[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
+					events_data=self.copy_and_reset(self.shared_events_data, now_min%600==540)
 					#Ask the FPGA for the counts data
 					self.port.write(chr(17)) #0x11
 						#wait release the lock and wait for a notification.
@@ -48,36 +91,19 @@ class CountsPettioner(threading.Thread):
 
 					#  TODO Pressure and HV sensors information.....
 
-					time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
-					entry_countsFromEvents={'start_date_time':time_entry,
-								'binTableEvents':events_data[0],
-					}
-					if self.database_adapter==None:
-						print entry_counts
-					else:
-						sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18) values ('"+time_entry+"', "+`binTable[0]`+", "+`binTable[1]`+", "+`binTable[2]`+", "+`binTable[3]`+", "+`binTable[4]`+", "+`binTable[5]`+", "+`binTable[6]`+", "+`binTable[7]`+", "+`binTable[8]`+", "+`binTable[9]`+", "+`binTable[10]`+", "+`binTable[11]`+", "+`binTable[12]`+", "+`binTable[13]`+", "+`binTable[14]`+", "+`binTable[15]`+", "+`binTable[16]`+", "+`binTable[17]`+")"
-						self.database_adapter.execute(sql)
-						self.database_adapter.commit()
-						
+					
+					self.save_BinTable(self.database_adapter,now_min,binTable)
 					#By default print the countsFromEvents 
 					#  TODO decide if we want to save them
+					entry_countsFromEvents={'start_date_time':'auxxxx',
+								'binTableEvents':events_data[0],
+					}
 					print entry_countsFromEvents
 
 					if now_min%600==540:
-						time_entry=datetime.datetime.fromtimestamp(now_min-540).strftime('%Y-%m-%d %H:%M:%S')
-						entry_histogram={	'start_date_time':time_entry,
-									'histogram':events_data[1],
-									'lowlevels':events_data[2],
-									'overflows':events_data[3],
-						}
-						if self.database_adapter==None:
-							print entry_histogram
-						else:
-							sql="insert into EventsInfo10Mins (start_date_time, overflows, lowLevels, ch01Histo, ch02Histo, ch03Histo, ch04Histo, ch05Histo, ch06Histo, ch07Histo, ch08Histo, ch09Histo, ch10Histo, ch11Histo, ch12Histo, ch13Histo, ch14Histo, ch15Histo, ch16Histo, ch17Histo, ch18Histo) values ('"+time_entry+"', '"+self.aux(events_data[3])+"', '"+self.aux(events_data[2])+"', '"+self.aux(events_data[1][0])+"', '"+self.aux(events_data[1][1])+"', '"+self.aux(events_data[1][2])+"', '"+self.aux(events_data[1][3])+"', '"+self.aux(events_data[1][4])+"', '"+self.aux(events_data[1][5])+"', '"+self.aux(events_data[1][6])+"', '"+self.aux(events_data[1][7])+"', '"+self.aux(events_data[1][8])+"', '"+self.aux(events_data[1][9])+"', '"+self.aux(events_data[1][10])+"', '"+self.aux(events_data[1][11])+"', '"+self.aux(events_data[1][12])+"', '"+self.aux(events_data[1][13])+"', '"+self.aux(events_data[1][14])+"', '"+self.aux(events_data[1][15])+"', '"+self.aux(events_data[1][16])+"', '"+self.aux(events_data[1][17])+"')"
-							self.database_adapter.execute(sql)
-							self.database_adapter.commit()
+						self.save_EventsInfo(self.database_adapter,now_min,events_data)
 
-					now_min=now-now%60
+					now_min=self.get_min(now)
 				else:
 					print 'The thread have woke up earlier, this shouldnt happend and this code is just to check... '
 

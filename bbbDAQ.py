@@ -9,7 +9,7 @@ import sqlite3
 
 from Reader import Reader
 from CountsPettioner import CountsPettioner
-from ap1 import ap1
+#from ap1 import ap1
 
 
 if __name__=='__main__':
@@ -100,11 +100,13 @@ if __name__=='__main__':
 
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
 	contadores=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn)
-	barometer=init_barometer(args.barometer, end_condition, shared_pressure_data, args.serialPortBar)
+	import bbbDAQ
+	barometer={}
+	barometer=bbbDAQ.init_barometer(args.barometer, end_condition, shared_pressure_data, args.serialPortBar)
 		
 	reader.start()
 	contadores.start()
-	if barometer!=None:
+	if 'barometer' in barometer:
 		barometer['barometer'].start()
 
 	import signal
@@ -120,28 +122,27 @@ if __name__=='__main__':
 	while end_condition.is_set():
 		time.sleep(100000000000)
 
-	conn.close()
+	if conn!=None:
+		conn.close()
 	reader.join()
 	contadores._Thread__stop()
-	if barometer!=None:
+	if 'barometer' in barometer:
 		barometer['barometer']._Thread__stop()
 	port.close()
 	if 'port' in barometer:
 		barometer['port'].close()
 
-@staticmethod
 def init_barometer(barometer_arg, end_condition, shared_pressure_data, port_arg):
 	return {
         	'ap1': init_ap1(end_condition, shared_pressure_data),
-        	'bm35': None,  #  TODO
-        }.get(barometer_arg, None)  # The dafault value to return
+        	'bm35': {'barometer':None,'port':None},  #  TODO
+		None:{},
+        }[barometer_arg]  # The dafault value to return
 	
-@staticmethod
 def init_ap1(end_condition, shared_pressure_data):
-	ap1_bar=ap1(end_conditio, shared_pressure_data)
-	return {'barometer':ap_1}
+	ap1_bar=None#ap1(end_conditio, shared_pressure_data)
+	return {'barometer':ap1_bar}
 
-@staticmethod
 def init_bm35(end_conditio, shared_pressure_data, port_arg):
 	#  TODO init the port that will read the data
 	#  TODO init the thread itself and return it
