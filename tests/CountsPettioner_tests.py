@@ -33,7 +33,10 @@ class CountsPettionerTestCase(unittest.TestCase):
 
 
 	def test_OutPut_save_BinTable(self):
-		with capture(CP.save_BinTable,None,1405516380.0, [23,12,45,23,12,67]) as output:
+		#Instance of a CountsPettioner where everythong is None.
+		database_adapter=None
+		CP_instance=CP(None, None, None, None, None, database_adapter)
+		with capture(CP_instance.save_BinTable,1405516380.0, [23,12,45,23,12,67]) as output:
 			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 Counts: [23, 12, 45, 23, 12, 67]\n','Nah man')		
 
 
@@ -41,13 +44,19 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database=MagicMock()
 		database.execute=MagicMock(return_value=True)
 		database.commit=MagicMock(return_value=True)
-		CP.save_BinTable(database,1405516380.0,[4 for x in xrange(18)])
+
+		#Instance of a CountsPettioner where everythong is None except the database_adapter.
+		CP_instance=CP(None, None, None, None, None, database)
+		CP_instance.save_BinTable(1405516380.0,[4 for x in xrange(18)])
 
 		database.execute.assert_called_with(mock.ANY)
 		database.commit.assert_called_with()
 
 	def test_OutPut_save_EventsInfo(self):
-		with capture(CP.save_EventsInfo,None,1405516380.0,[None,'To_print_histo','To_print_Low','To_print_Overflows']) as output:
+		#Instance of a CountsPettioner where everythong is None.
+		database_adapter=None
+		CP_instance=CP(None, None, None, None, None, database_adapter)
+		with capture(CP_instance.save_EventsInfo,1405516380.0,[None,'To_print_histo','To_print_Low','To_print_Overflows']) as output:
 			self.assertEqual(output, 'start_date_time: 2014-07-16 15:04:00 \nhistograms: To_print_histo \nlowlevels: To_print_Low \noverflows: To_print_Overflows\n')
 		
 
@@ -55,7 +64,10 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database=MagicMock()
 		database.execute=MagicMock(return_value=True)
 		database.commit=MagicMock(return_value=True)
-		CP.save_EventsInfo(database,1405516380.0,[None,[[4 for x in xrange(128)] for x in xrange(18)],[4 for x in xrange(18)],[0 for x in xrange(18)]])
+	
+		#Instance of a CountsPettioner where everythong is None except the database_adapter.
+		CP_instance=CP(None, None, None, None, None, database)
+		CP_instance.save_EventsInfo(1405516380.0,[None,[[4 for x in xrange(128)] for x in xrange(18)],[4 for x in xrange(18)],[0 for x in xrange(18)]])
 
 		database.execute.assert_called_with(mock.ANY)
 		database.commit.assert_called_with()
