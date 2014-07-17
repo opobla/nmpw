@@ -69,6 +69,19 @@ class CountsPettioner(threading.Thread):
 		return the_time-the_time%60
 
 
+	def request_get_Counts_EventsInfo(self,now_min):
+		#acquire--release blocks executes atomicly.
+		self.counts_condition.acquire()
+		events_data=self.copy_and_reset(self.shared_events_data, now_min%600==540)
+		#Ask the FPGA for the counts data
+		self.port.write('\x11') #0x11
+		#wait release the lock and wait for a notification.
+		self.counts_condition.wait()
+
+		#  TODO make a method that copy the shared data and test it. The slice trick is weird..
+		binTable=self.shared_counts_data[:]	
+		self.counts_condition.release()
+		return {'Counts':binTable,'EventsInfo':events_data}
 
 	def run(self):
 		now_min=None
@@ -78,29 +91,19 @@ class CountsPettioner(threading.Thread):
 				now_min=self.get_min(now)
 			else:
 				if now_min+60 < now:   
-						#acquire--release blocks executes atomicly.
-					self.counts_condition.acquire()
-					events_data=self.copy_and_reset(self.shared_events_data, now_min%600==540)
-					#Ask the FPGA for the counts data
-					self.port.write(chr(17)) #0x11
-						#wait release the lock and wait for a notification.
-					self.counts_condition.wait()
-					binTable=self.shared_counts_data[:]	
-					self.counts_condition.release()
-
+					data=self.request_get_Counts_EventsInfo(now_min)
 					#  TODO Pressure and HV sensors information.....
-
 					
-					self.save_BinTable(now_min,binTable)
+					self.save_BinTable(now_min,data['Counts'])
 					#By default print the countsFromEvents 
 					#  TODO decide if we want to save them
 					entry_countsFromEvents={'start_date_time':'auxxxx',
-								'binTableEvents':events_data[0],
+								'binTableEvents':data['EventsInfo'][0],
 					}
 					print entry_countsFromEvents
 
 					if now_min%600==540:
-						self.save_EventsInfo(now_min,events_data)
+						self.save_EventsInfo(now_min,data['EventsInfo'])
 
 					now_min=self.get_min(now)
 				else:

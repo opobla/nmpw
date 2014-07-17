@@ -1,6 +1,7 @@
 import unittest
 import mock
 from mock import MagicMock
+from mock import call
 import sys
 sys.path.append('.')
 from CountsPettioner import CountsPettioner as CP
@@ -88,6 +89,37 @@ class CountsPettionerTestCase(unittest.TestCase):
 		self.assertEqual(myCP.shared_counts_data,4,'CountsPettioner Constructor behaving incorrectly')
 		self.assertEqual(myCP.shared_events_data,5,'CountsPettioner Constructor behaving incorrectly')
 		self.assertEqual(myCP.database_adapter,6,'CountsPettioner Constructor behaving incorrectly')
+
+
+	def test_request_get_Counts_EventsInfo(self):
+		counts_condition=MagicMock()
+		counts_condition.acquire.return_value=True
+		counts_condition.wait.return_value=True
+		counts_condition.release.return_value=True
+		shared_counts_data=[1,2,3,4,5]
+		shared_events_data='HiThere'
+		# the mock for the port and the counts_condition is the same. This way we can assert the call_order.
+		port=counts_condition
+		port.write.return_value=True
+		
+		CP_instance=CP(port, None, counts_condition, shared_counts_data, shared_events_data, None)
+		CP_instance.copy_and_reset=MagicMock(return_value='Hi')
+
+		responce=CP_instance.request_get_Counts_EventsInfo(123.0)
+
+
+		# This is the flow that our thread must follow in order to correctly receive the data.
+		# First of all we acquire the condition in order to ensure the atomic execution of the the rest of the code. We can see that the last instruction releases the condition.
+		# Once the atomicity is ensured, we proceed with the data acquisition. For the purpose we first write into the port requesting the counts and then we must wait until the counts are delivered by the Reader thread.
+		counts_condition.assert_has_calls([call.acquire(),call.write('\x11'),call.wait(),call.release()],any_order=False)
+		
+		self.assertEqual(responce['Counts'],shared_counts_data)
+		#Remember this must equal to the ouput from the copy_and_reset method which is mocked to retyrn 'Hi'. The next assertion will be: Has the copy_and_reset function been called with the value of the shared_events_data.
+		self.assertEqual(responce['EventsInfo'],'Hi')
+		CP_instance.copy_and_reset.assert_called_with(shared_events_data,False)
+
+		
+
 
 
 import sys
