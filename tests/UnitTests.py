@@ -1,3 +1,9 @@
+from coverage import coverage
+
+cov = coverage()
+cov.start()
+#################################################################################################
+################################Coverage_START#####################################################
 import unittest
 from bm35_tests import bm35TestCase
 from CountsPettioner_tests import CountsPettionerTestCase
@@ -15,3 +21,7 @@ if __name__ == '__main__':
 	allTests.addTests(CountsPettioner_suite())
 	
 	unittest.TextTestRunner(verbosity=2).run(allTests)
+#################################################################################################
+################################Coverage_END#####################################################
+cov.stop()
+cov.html_report(directory='covhtml',omit=['*test*','/usr/*'])
