@@ -20,12 +20,10 @@ class Reader(threading.Thread):
 		self.low_events=[0 for x in xrange(18)]
 		self.overflows=[0 for x in xrange(18)]
 
-
+		self.shared_counts_data[:]=[0 for x in xrange(18)]
 		self.shared_events_data[:]=[[0 for x in xrange(18)],[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
 		
 	def run(self):
-		now_min=None
-		now_ten_min=None
 		channel_counts=None
 		while self.end_condition.is_set():
 			next=self.port.read(1)
@@ -55,7 +53,7 @@ class Reader(threading.Thread):
 	
 				print 'Yo man overflow: ',overflow
 				self.shared_events_data[3][:]=map(operator.add, self.shared_events_data[3],overflow)
-				#  TODO Decide what do with the overflow_general and almost_full data...
+				#  TODO Decide what to do with the overflow_general and almost_full data...
 				continue
 		
 			#----------------Pulse Widths
@@ -78,9 +76,6 @@ class Reader(threading.Thread):
         			pulse_type=(ord(next[0]) & 0b00100000) >> 5
         			pulse_width_ticks=count06 + (count711 << 7)
 
-				now=time.time()
-				
-				
 				if pulse_type==0:
 					#self.low_events[channel] +=1
 					self.shared_events_data[2][channel] +=1
@@ -142,7 +137,8 @@ class Reader(threading.Thread):
 				#  TODO Somethong went wrong reading the Counts
 			self.status='bytex'
 			#  TODO maybe restart all the varibles {channel_counts}
-			print 'Yo man, something went wrong'
+			#  TODO keep acounts of unexpected reads
+			print 'Unexpected reading'
 
 
 
