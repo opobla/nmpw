@@ -52,6 +52,27 @@ class CountsPettionerTestCase(unittest.TestCase):
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
 
+	def test_OutPut_save_BinTableFromEvents(self):
+		#Instance of a CountsPettioner where everythong is None.
+		database_adapter=None
+		CP_instance=CP(None, None, None, None, None, database_adapter)
+		with capture(CP_instance.save_BinTableFromEvents,1405516380.0, [23,12,45,23,12,67]) as output:
+			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 CountsFromEvents: [23, 12, 45, 23, 12, 67]\n')		
+
+
+	def test_DatabaseCalls_save_BinTableFromEvents(self):
+		database=MagicMock()
+		database.execute.return_value=True
+		database.commit.return_value=True
+
+		#Instance of a CountsPettioner where everythong is None except the database_adapter.
+		CP_instance=CP(None, None, None, None, None, database)
+		CP_instance.save_BinTableFromEvents(1405516380.0,[4 for x in xrange(18)])
+
+		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
+
+
+
 	def test_OutPut_save_EventsInfo(self):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None

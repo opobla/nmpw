@@ -54,6 +54,16 @@ class CountsPettioner(threading.Thread):
 			self.database_adapter.commit()
 
 
+	def save_BinTableFromEvents(self, now_min, binTableFromEvents):
+		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
+		if self.database_adapter==None:
+			print 'start_date_time:',time_entry,'CountsFromEvents:',binTableFromEvents
+		else:
+			sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18) values ('"+time_entry+"', "+`binTableFromEvents[0]`+", "+`binTableFromEvents[1]`+", "+`binTableFromEvents[2]`+", "+`binTableFromEvents[3]`+", "+`binTableFromEvents[4]`+", "+`binTableFromEvents[5]`+", "+`binTableFromEvents[6]`+", "+`binTableFromEvents[7]`+", "+`binTableFromEvents[8]`+", "+`binTableFromEvents[9]`+", "+`binTableFromEvents[10]`+", "+`binTableFromEvents[11]`+", "+`binTableFromEvents[12]`+", "+`binTableFromEvents[13]`+", "+`binTableFromEvents[14]`+", "+`binTableFromEvents[15]`+", "+`binTableFromEvents[16]`+", "+`binTableFromEvents[17]`+")"
+			self.database_adapter.execute(sql)
+			self.database_adapter.commit()
+			
+
 	def save_EventsInfo(self, now_min, events_data):
 		time_entry=datetime.datetime.fromtimestamp(now_min-540).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
@@ -95,13 +105,7 @@ class CountsPettioner(threading.Thread):
 					#  TODO Pressure and HV sensors information.....
 					
 					self.save_BinTable(now_min,data['Counts'])
-					#By default print the countsFromEvents 
-					#  TODO decide if we want to save them
-					entry_countsFromEvents={'start_date_time':'auxxxx',
-								'binTableEvents':data['EventsInfo'][0],
-					}
-					print entry_countsFromEvents
-
+					self.save_BinTableFromEvents(now_min,data['EventsInfo'][0])
 					if now_min%600==540:
 						self.save_EventsInfo(now_min,data['EventsInfo'])
 

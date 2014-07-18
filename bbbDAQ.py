@@ -35,7 +35,36 @@ if __name__=='__main__':
 	if args.database!='shell':
 		conn = sqlite3.connect(args.database, check_same_thread=False)
 		conn.execute("CREATE TABLE IF NOT EXISTS 'binTable' (\
-					'start_date_time' datetime NOT NULL,\
+					 'start_date_time' datetime NOT NULL,\
+					 'ch01' int(11) DEFAULT NULL,\
+					 'ch02' int(11) DEFAULT NULL,\
+					 'ch03' int(11) DEFAULT NULL,\
+					 'ch04' int(11) DEFAULT NULL,\
+					 'ch05' int(11) DEFAULT NULL,\
+					 'ch06' int(11) DEFAULT NULL,\
+					 'ch07' int(11) DEFAULT NULL,\
+					 'ch08' int(11) DEFAULT NULL,\
+					 'ch09' int(11) DEFAULT NULL,\
+					 'ch10' int(11) DEFAULT NULL,\
+					 'ch11' int(11) DEFAULT NULL,\
+					 'ch12' int(11) DEFAULT NULL,\
+					 'ch13' int(11) DEFAULT NULL,\
+					 'ch14' int(11) DEFAULT NULL,\
+					 'ch15' int(11) DEFAULT NULL,\
+					 'ch16' int(11) DEFAULT NULL,\
+					 'ch17' int(11) DEFAULT NULL,\
+					 'ch18' int(11) DEFAULT NULL,\
+					 'hv1' int(11) DEFAULT NULL,\
+					 'hv2' int(11) DEFAULT NULL,\
+					 'hv3' int(11) DEFAULT NULL,\
+					 'temp_1' int(11) DEFAULT NULL,\
+					 'temp_2' int(11) DEFAULT NULL,\
+					 'atmPressure' int(11) DEFAULT NULL,\
+					 PRIMARY KEY ('start_date_time')\
+		)")
+
+		conn.execute("CREATE TABLE IF NOT EXISTS 'binTableFromEvents' (\
+					 'start_date_time' datetime NOT NULL,\
 					 'ch01' int(11) DEFAULT NULL,\
 					 'ch02' int(11) DEFAULT NULL,\
 					 'ch03' int(11) DEFAULT NULL,\
