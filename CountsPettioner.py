@@ -44,22 +44,22 @@ class CountsPettioner(threading.Thread):
             			the_array[i] = 0
 			
 
-	def save_BinTable(self, now_min, binTable):
+	def save_BinTable(self, now_min, binTable, sensors):
 		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
-			print 'start_date_time:',time_entry,'Counts:',binTable
+			print 'start_date_time:', time_entry, 'Counts:', binTable, 'Sensors:', sensors
 		else:
-			sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18) values ('"+time_entry+"', "+`binTable[0]`+", "+`binTable[1]`+", "+`binTable[2]`+", "+`binTable[3]`+", "+`binTable[4]`+", "+`binTable[5]`+", "+`binTable[6]`+", "+`binTable[7]`+", "+`binTable[8]`+", "+`binTable[9]`+", "+`binTable[10]`+", "+`binTable[11]`+", "+`binTable[12]`+", "+`binTable[13]`+", "+`binTable[14]`+", "+`binTable[15]`+", "+`binTable[16]`+", "+`binTable[17]`+")"
+			sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTable[0]`+", "+`binTable[1]`+", "+`binTable[2]`+", "+`binTable[3]`+", "+`binTable[4]`+", "+`binTable[5]`+", "+`binTable[6]`+", "+`binTable[7]`+", "+`binTable[8]`+", "+`binTable[9]`+", "+`binTable[10]`+", "+`binTable[11]`+", "+`binTable[12]`+", "+`binTable[13]`+", "+`binTable[14]`+", "+`binTable[15]`+", "+`binTable[16]`+", "+`binTable[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
 			self.database_adapter.execute(sql)
 			self.database_adapter.commit()
 
 
-	def save_BinTableFromEvents(self, now_min, binTableFromEvents):
+	def save_BinTableFromEvents(self, now_min, binTableFromEvents, sensors):
 		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
-			print 'start_date_time:',time_entry,'CountsFromEvents:',binTableFromEvents
+			print 'start_date_time:', time_entry, 'CountsFromEvents:', binTableFromEvents, 'Sensors:', sensors
 		else:
-			sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18) values ('"+time_entry+"', "+`binTableFromEvents[0]`+", "+`binTableFromEvents[1]`+", "+`binTableFromEvents[2]`+", "+`binTableFromEvents[3]`+", "+`binTableFromEvents[4]`+", "+`binTableFromEvents[5]`+", "+`binTableFromEvents[6]`+", "+`binTableFromEvents[7]`+", "+`binTableFromEvents[8]`+", "+`binTableFromEvents[9]`+", "+`binTableFromEvents[10]`+", "+`binTableFromEvents[11]`+", "+`binTableFromEvents[12]`+", "+`binTableFromEvents[13]`+", "+`binTableFromEvents[14]`+", "+`binTableFromEvents[15]`+", "+`binTableFromEvents[16]`+", "+`binTableFromEvents[17]`+")"
+			sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTableFromEvents[0]`+", "+`binTableFromEvents[1]`+", "+`binTableFromEvents[2]`+", "+`binTableFromEvents[3]`+", "+`binTableFromEvents[4]`+", "+`binTableFromEvents[5]`+", "+`binTableFromEvents[6]`+", "+`binTableFromEvents[7]`+", "+`binTableFromEvents[8]`+", "+`binTableFromEvents[9]`+", "+`binTableFromEvents[10]`+", "+`binTableFromEvents[11]`+", "+`binTableFromEvents[12]`+", "+`binTableFromEvents[13]`+", "+`binTableFromEvents[14]`+", "+`binTableFromEvents[15]`+", "+`binTableFromEvents[16]`+", "+`binTableFromEvents[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
 			self.database_adapter.execute(sql)
 			self.database_adapter.commit()
 			
@@ -67,7 +67,7 @@ class CountsPettioner(threading.Thread):
 	def save_EventsInfo(self, now_min, events_data):
 		time_entry=datetime.datetime.fromtimestamp(now_min-540).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
-			print 'start_date_time:',time_entry,'\nhistograms:',events_data[1],'\nlowlevels:',events_data[2],'\noverflows:',events_data[3]
+			print '\nstart_date_time:',time_entry,'\nhistograms:',events_data[1],'\nlowlevels:',events_data[2],'\noverflows:',events_data[3]
 		else:
 			sql="insert into EventsInfo10Mins (start_date_time, overflows, lowLevels, ch01Histo, ch02Histo, ch03Histo, ch04Histo, ch05Histo, ch06Histo, ch07Histo, ch08Histo, ch09Histo, ch10Histo, ch11Histo, ch12Histo, ch13Histo, ch14Histo, ch15Histo, ch16Histo, ch17Histo, ch18Histo) values ('"+time_entry+"', '"+self.aux(events_data[3])+"', '"+self.aux(events_data[2])+"', '"+self.aux(events_data[1][0])+"', '"+self.aux(events_data[1][1])+"', '"+self.aux(events_data[1][2])+"', '"+self.aux(events_data[1][3])+"', '"+self.aux(events_data[1][4])+"', '"+self.aux(events_data[1][5])+"', '"+self.aux(events_data[1][6])+"', '"+self.aux(events_data[1][7])+"', '"+self.aux(events_data[1][8])+"', '"+self.aux(events_data[1][9])+"', '"+self.aux(events_data[1][10])+"', '"+self.aux(events_data[1][11])+"', '"+self.aux(events_data[1][12])+"', '"+self.aux(events_data[1][13])+"', '"+self.aux(events_data[1][14])+"', '"+self.aux(events_data[1][15])+"', '"+self.aux(events_data[1][16])+"', '"+self.aux(events_data[1][17])+"')"
 			self.database_adapter.execute(sql)
@@ -103,9 +103,10 @@ class CountsPettioner(threading.Thread):
 				if now_min+60 < now:   
 					data=self.request_get_Counts_EventsInfo(now_min)
 					#  TODO Pressure and HV sensors information.....
-					
-					self.save_BinTable(now_min,data['Counts'])
-					self.save_BinTableFromEvents(now_min,data['EventsInfo'][0])
+					sensors={'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+
+					self.save_BinTable(now_min,data['Counts'],sensors)
+					self.save_BinTableFromEvents(now_min,data['EventsInfo'][0],sensors)
 					if now_min%600==540:
 						self.save_EventsInfo(now_min,data['EventsInfo'])
 

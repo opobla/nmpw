@@ -37,8 +37,8 @@ class CountsPettionerTestCase(unittest.TestCase):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
 		CP_instance=CP(None, None, None, None, None, database_adapter)
-		with capture(CP_instance.save_BinTable,1405516380.0, [23,12,45,23,12,67]) as output:
-			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 Counts: [23, 12, 45, 23, 12, 67]\n')		
+		with capture(CP_instance.save_BinTable,1405516380.0, [23,12,45,23,12,67], [1,2]) as output:
+			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 Counts: [23, 12, 45, 23, 12, 67] Sensors: [1, 2]\n')		
 
 
 	def test_DatabaseCalls_save_BinTable(self):
@@ -48,7 +48,8 @@ class CountsPettionerTestCase(unittest.TestCase):
 
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
 		CP_instance=CP(None, None, None, None, None, database)
-		CP_instance.save_BinTable(1405516380.0,[4 for x in xrange(18)])
+		CP_instance.save_BinTable(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+)
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
 
@@ -56,8 +57,8 @@ class CountsPettionerTestCase(unittest.TestCase):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
 		CP_instance=CP(None, None, None, None, None, database_adapter)
-		with capture(CP_instance.save_BinTableFromEvents,1405516380.0, [23,12,45,23,12,67]) as output:
-			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 CountsFromEvents: [23, 12, 45, 23, 12, 67]\n')		
+		with capture(CP_instance.save_BinTableFromEvents,1405516380.0, [23,12,45,23,12,67], [1,2]) as output:
+			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 CountsFromEvents: [23, 12, 45, 23, 12, 67] Sensors: [1, 2]\n')		
 
 
 	def test_DatabaseCalls_save_BinTableFromEvents(self):
@@ -67,7 +68,8 @@ class CountsPettionerTestCase(unittest.TestCase):
 
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
 		CP_instance=CP(None, None, None, None, None, database)
-		CP_instance.save_BinTableFromEvents(1405516380.0,[4 for x in xrange(18)])
+		CP_instance.save_BinTableFromEvents(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+)
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
 
@@ -78,7 +80,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database_adapter=None
 		CP_instance=CP(None, None, None, None, None, database_adapter)
 		with capture(CP_instance.save_EventsInfo,1405516380.0,[None,'To_print_histo','To_print_Low','To_print_Overflows']) as output:
-			self.assertEqual(output, 'start_date_time: 2014-07-16 15:04:00 \nhistograms: To_print_histo \nlowlevels: To_print_Low \noverflows: To_print_Overflows\n')
+			self.assertEqual(output, '\nstart_date_time: 2014-07-16 15:04:00 \nhistograms: To_print_histo \nlowlevels: To_print_Low \noverflows: To_print_Overflows\n')
 		
 
 	def test_DatabaseCalls_save_EventsInfo(self):
