@@ -73,6 +73,12 @@ class CountsPettioner(threading.Thread):
 			self.database_adapter.execute(sql)
 			self.database_adapter.commit()
 
+	def save_data(self, now_min, data, sensors_data):
+		self.save_BinTable(now_min,data['Counts'],sensors_data)
+		self.save_BinTableFromEvents(now_min,data['EventsInfo'][0],sensors_data)
+		if now_min%600==540:
+			self.save_EventsInfo(now_min,data['EventsInfo'])
+
 
 	@staticmethod
 	def get_min(the_time):
@@ -103,12 +109,9 @@ class CountsPettioner(threading.Thread):
 				if now_min+60 < now:   
 					data=self.request_get_Counts_EventsInfo(now_min)
 					#  TODO Pressure and HV sensors information.....
-					sensors={'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
-
-					self.save_BinTable(now_min,data['Counts'],sensors)
-					self.save_BinTableFromEvents(now_min,data['EventsInfo'][0],sensors)
-					if now_min%600==540:
-						self.save_EventsInfo(now_min,data['EventsInfo'])
+					sensors_data={'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+					
+					self.save_data(now_min, data, sensors_data)
 
 					now_min=self.get_min(now)
 				else:

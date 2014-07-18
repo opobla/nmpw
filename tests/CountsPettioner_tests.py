@@ -94,6 +94,29 @@ class CountsPettionerTestCase(unittest.TestCase):
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
 
+	def test_Calls_save_data(self):
+		CP_instance=CP(None, None, None, None, None, None)
+		CP_instance.save_BinTable=MagicMock(return_value=True)
+		CP_instance.save_BinTableFromEvents=MagicMock(return_value=True)
+		CP_instance.save_EventsInfo=MagicMock(return_value=True)
+		
+		data= {'Counts':'Hi', 'EventsInfo':['There', 'Nice', 'To', 'Meet', 'You']}
+
+		CP_instance.save_data(120.0, data, 'sensors_data')
+		CP_instance.save_BinTable.assert_called_with(120.0, data['Counts'], 'sensors_data')
+		CP_instance.save_BinTableFromEvents.assert_called_with(120.0, data['EventsInfo'][0], 'sensors_data')
+		assert not CP_instance.save_EventsInfo.called
+
+		CP_instance.save_BinTable.reset_mock()
+		CP_instance.save_BinTableFromEvents.reset_mock()
+		CP_instance.save_EventsInfo.reset_mock()
+
+		CP_instance.save_data(540.0, data, 'sensors_data')
+		CP_instance.save_BinTable.assert_called_with(540.0, data['Counts'], 'sensors_data')
+		CP_instance.save_BinTableFromEvents.assert_called_with(540.0, data['EventsInfo'][0], 'sensors_data')
+		CP_instance.save_EventsInfo.assert_called_with(540.0, data['EventsInfo'])
+		
+
 	def test_Equality_get_min(self):
 		response=CP.get_min(1405524513.631769)
 		self.assertEqual(response,1405524480.0)
