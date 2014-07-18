@@ -162,7 +162,64 @@ class CountsPettionerTestCase(unittest.TestCase):
 		self.assertEqual(responce['EventsInfo'],'Hi')
 		CP_instance.copy_and_reset.assert_called_with(shared_events_data,False)
 
+
+	def test_run_loop(self):
+		# Mock the time
+		time=MagicMock()
+		time.sleep.return_value=True		
+		time.time.side_effect=ReturnSequence([40.7,40.9,68.7,68.8],0.0)
+
+		# Mock the end condition
+		end_condition=MagicMock()
+		end_condition.is_set.side_effect=ReturnSequence([True,True],False)
+
+		# Make the CountsPettioner use the mocked time.
+		sys.modules['time'] = time
+		import CountsPettioner
+		reload(CountsPettioner)  
+
+		# Create CountsPettioner and mock the methods called inside the run loop
+		CP_instance=CP(None, end_condition, None, None, None, None)
+		aux=MagicMock()
+		aux.request_get_Counts_EventsInfo.return_value='Potato'
+		aux.save_data.return_value=True
+		CP_instance.request_get_Counts_EventsInfo=aux.request_get_Counts_EventsInfo
+		CP_instance.save_data=aux.save_data
+	
+		CP_instance.run()
 		
+		end_condition.is_set.assert_called_with()
+		time.sleep.assert_has_calls([call(60.0-40.9),call(120.0-68.8)])
+		aux.assert_has_calls([call.request_get_Counts_EventsInfo(0.0),call.save_data(0.0, 'Potato', mock.ANY)], any_order=False)
+
+
+	def test_run_loop_error(self):
+		# Mock the time
+		time=MagicMock()
+		time.sleep.return_value=True		
+		time.time.side_effect=ReturnSequence([40.7,40.9,59.7,59.8],0.0)
+
+		# Mock the end condition
+		end_condition=MagicMock()
+		end_condition.is_set.side_effect=ReturnSequence([True,True],False)
+
+		# Make the CountsPettioner use the mocked time.
+		sys.modules['time'] = time
+		import CountsPettioner
+		reload(CountsPettioner)  
+
+		# Create CountsPettioner and mock the methods called inside the run loop
+		CP_instance=CP(None, end_condition, None, None, None, None)
+
+		aux=MagicMock()
+		aux.request_get_Counts_EventsInfo.return_value='Potato'
+		aux.save_data.return_value=True
+		CP_instance.request_get_Counts_EventsInfo=aux.request_get_Counts_EventsInfo
+		CP_instance.save_data=aux.save_data
+	
+		# the CountsPettioner thread should wake up once every minute. With this test we assert if an error is correctly raised when the thread wakes up twice in one minute
+		self.assertRaisesRegexp(AssertionError,'The thread have woken up earlier', CP_instance.run)
+
 
 
 
@@ -177,3 +234,17 @@ def capture(command, *args, **kwargs):
   sys.stdout.seek(0)
   yield sys.stdout.read()
   sys.stdout = out
+
+
+
+
+class ReturnSequence(object):
+    def __init__(self, return_sequence, expired):
+        self.return_sequence = return_sequence
+	self.expired = expired
+
+    def __call__(self):
+        if 0  < len(self.return_sequence):
+            	return self.return_sequence.pop(0)
+	else:
+		return self.expired
