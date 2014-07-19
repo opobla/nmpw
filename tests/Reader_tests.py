@@ -1,6 +1,7 @@
 import unittest
 import mock
 from mock import MagicMock
+from mock import call
 
 from Reader import Reader
 
@@ -108,8 +109,28 @@ class ReaderTestCase(unittest.TestCase):
 		reader=Reader(port , end_condition, None, [], [])
 		reader.run()
 
-		self.assertEqual(reader.shared_events_data[2][5],1)
+		self.assertEqual(reader.shared_events_data[2][5], 1)
 
+	# For this test we will mock the port to return a sequence of 55 bytes which will represent sertant amount of channel counts. Once executed the Reader we will assert on the shared_counts_data.
+	def tests_counts(self):
+		end_condition=MagicMock()
+		end_condition.is_set.side_effect=ReturnSequence([True]*55, False)
+		
+		port=MagicMock()
+		counts_seq=[['\x60']]
+		counts_seq.extend([['\x8A'], ['\x80'], ['\x80']]*18)
+		port.read.side_effect=ReturnSequence(counts_seq, ['\x00'])
+		# the mock for the port and the counts_condition is the same. This way we can assert on the call_order.
+		counts_condition=MagicMock()
+                counts_condition.acquire.return_value=True
+                counts_condition.notify.return_value=True
+                counts_condition.release.return_value=True
+
+		reader=Reader(port , end_condition, counts_condition, [], [])
+		reader.run()
+	
+		self.assertEqual(reader.shared_counts_data, [10 for x in xrange(18)])
+		counts_condition.assert_has_calls([call.acquire(),call.notify(),call.release()],any_order=False)
 		
 
 
