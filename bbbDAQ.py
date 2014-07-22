@@ -19,8 +19,6 @@ if __name__=='__main__':
 	parser.add_argument('-db','--database',type=str,default='shell',help='The database where the data will be stored, by default the data will be printed on the shell.')
 	parser.add_argument('-bm','--barometer',type=str,default=None,help='The barometer used for the pressure measurement')
 	parser.add_argument('-spb','--serialPortBar',type=str,default=None,help='The port the barometer will use to to deliver the data')
-	#parser.add_argument('-ch','--collectionHistograms',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
-	#parser.add_argument('-cc','--collectionCounts',type=str,default='shell',help='The name of the collection which will store the data, by default the data will be printed on the shell.')
 
 	#Parse the arguments
 	args=parser.parse_args()
@@ -121,7 +119,8 @@ if __name__=='__main__':
 	end_condition=threading.Event()
 	end_condition.set()
 
-	counts_condition=threading.Condition()
+	counts_condition=threading.Lock()
+	counts_condition.acquire()
 	shared_counts_data=[]
 	shared_events_data=[]
 	shared_pressure_data=None

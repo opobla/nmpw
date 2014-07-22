@@ -120,7 +120,7 @@ class ReaderTestCase(unittest.TestCase):
 		counts_seq=[['\x60']]
 		counts_seq.extend([['\x8A'], ['\x80'], ['\x80']]*18)
 		port.read.side_effect=ReturnSequence(counts_seq, ['\x00'])
-		# the mock for the port and the counts_condition is the same. This way we can assert on the call_order.
+
 		counts_condition=MagicMock()
                 counts_condition.acquire.return_value=True
                 counts_condition.notify.return_value=True
@@ -130,7 +130,7 @@ class ReaderTestCase(unittest.TestCase):
 		reader.run()
 	
 		self.assertEqual(reader.shared_counts_data, [10 for x in xrange(18)])
-		counts_condition.assert_has_calls([call.acquire(),call.notify(),call.release()],any_order=False)
+		counts_condition.assert_has_calls([call.release()],any_order=False)
 		
 
 

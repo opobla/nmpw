@@ -138,8 +138,6 @@ class CountsPettionerTestCase(unittest.TestCase):
 	def test_request_get_Counts_EventsInfo(self):
 		counts_condition=MagicMock()
 		counts_condition.acquire.return_value=True
-		counts_condition.wait.return_value=True
-		counts_condition.release.return_value=True
 		shared_counts_data=[1,2,3,4,5]
 		shared_events_data='HiThere'
 		# the mock for the port and the counts_condition is the same. This way we can assert the call_order.
@@ -155,7 +153,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		# This is the flow that our thread must follow in order to correctly receive the data.
 		# First of all we acquire the condition in order to ensure the atomic execution of the the rest of the code. We can see that the last instruction releases the condition.
 		# Once the atomicity is ensured, we proceed with the data acquisition. For the purpose we first write into the port requesting the counts and then we must wait until the counts are delivered by the Reader thread.
-		counts_condition.assert_has_calls([call.acquire(),call.write('\x11'),call.wait(),call.release()],any_order=False)
+		counts_condition.assert_has_calls([call.write('\x11'),call.acquire()],any_order=False)
 		
 		self.assertEqual(responce['Counts'],shared_counts_data)
 		#Remember this must equal to the ouput from the copy_and_reset method which is mocked to retyrn 'Hi'. The next assertion will be: Has the copy_and_reset function been called with the value of the shared_events_data.

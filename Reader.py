@@ -118,9 +118,7 @@ class Reader(threading.Thread):
 				counts_val=counts_val+((ord(next[0]) & 0b00000011) << 14)
 				counts_values[channel_counts]=counts_val
 				if channel_counts==17:
-					self.counts_condition.acquire()
 					self.shared_counts_data[:]=counts_values[:]
-					self.counts_condition.notify()
 					self.counts_condition.release()
 
 					channel_counts=None
