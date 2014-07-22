@@ -1,8 +1,9 @@
+import logging
 import argparse
 import time
 import threading
 from time import strftime
-import datetime
+from datetime import datetime
 import serial
 #import pymongo
 import sqlite3
@@ -175,6 +176,9 @@ def release_resources(port, port_bar, conn):
 
 
 if __name__=='__main__':
+	logging.basicConfig(filename='nmwp.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
+	logging.info('Started')
+
 	args=create_parser().parse_args()
 	port, port_bar, conn = init_resources(args)
 
@@ -183,6 +187,7 @@ if __name__=='__main__':
 	
 	#For now this allows us to stop the threads relising the resources
 	def signal_handler(signal, frame):
+		logging.info('End requested')
 		print 'Bye Bye'
 		reader.end_condition.clear()
 	signal.signal(signal.SIGINT,signal_handler)
@@ -192,6 +197,8 @@ if __name__=='__main__':
 
 	end_threads(reader, counts, barometer)
 	release_resources(port, port_bar, conn)
+
+	logging.info('Correctly ended. bye')
 	
 def init_barometer(barometer_arg, end_condition, shared_pressure_data, port_arg):
 	return {
