@@ -60,11 +60,16 @@ class ReaderTestCase(unittest.TestCase):
 		
 		port=MagicMock()
 		port.read.side_effect=ReturnSequence([['\xFF']],['\x00'])	
+		
+		logging=MagicMock()
+		logging.info.return_value=True
+		sys.modules['logging']=logging
+		import Reader
+		reload(Reader)
 
-		reader=Reader(port , end_condition, None, [], [])
-
-		with capture(reader.run) as output:
-			self.assertEqual(output, 'Unexpected reading\n')
+		reader=Reader.Reader(port , end_condition, None, [], [])
+		reader.run()
+		logging.info.assert_called_with(mock.ANY)
 
 
 	# High level pulse. Pulse.width < 0.2useg. Channel=3

@@ -3,6 +3,7 @@ import threading
 from time import strftime
 import datetime
 import operator
+import logging
 
 class Reader(threading.Thread):
 	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data):
@@ -22,7 +23,7 @@ class Reader(threading.Thread):
 
 		self.shared_counts_data[:]=[0 for x in xrange(18)]
 		self.shared_events_data[:]=[[0 for x in xrange(18)],[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
-		
+
 	def run(self):
 		channel_counts=None
 		while self.end_condition.is_set():
@@ -35,7 +36,7 @@ class Reader(threading.Thread):
 				self.status='Ovbyte1'
 				if channel_counts!=None:
 					channel_counts=None
-					#  TODO Something went wrong reading the Counts
+					logging.info(self.name+': Error:Error while reading the counts.')
 				overflow=[0 for x in xrange(18)]
 				overflow[0:6]=[int(x) for x in '{0:06b}'.format(ord(next[0]) & 0b00111111)[::-1]]
 				continue
@@ -61,7 +62,7 @@ class Reader(threading.Thread):
         			self.status="byte1"
 				if channel_counts!=None:
 					channel_counts=None
-					#  TODO Something went wrong reading the Counts
+					logging.info(self.name+': Error:Error while reading the counts.')
         			channel=ord(next[0]) & 0b00011111
         			continue
 
@@ -96,8 +97,7 @@ class Reader(threading.Thread):
 				self.status='Contbyte3'
 				print 'Counts transmision started...'
 				if channel_counts!=None:
-					print '' #This is here just to make compilation possible
-					#  TODO Somethong went wrong reading the Counts
+					logging.info(self.name+': Error:Error while reading the counts.')
 				channel_counts=0
 				counts_val=0
 				counts_values=[0 for x in xrange(18)]
@@ -131,12 +131,11 @@ class Reader(threading.Thread):
 
 			#--------Error, we have received something that wasnt expected
 			if channel_counts!=None:
-				print ''#this is here just to make compilation posible 
-				#  TODO Somethong went wrong reading the Counts
+				logging.info(self.name+': Error:Error while reading the counts.')
 			self.status='bytex'
 			#  TODO maybe restart all the varibles {channel_counts}
 			#  TODO keep acounts of unexpected reads
-			print 'Unexpected reading'
+			logging.info(self.name+':  Error:Unexpected reading')
 
 
 

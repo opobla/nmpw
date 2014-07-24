@@ -6,6 +6,7 @@ import datetime
 import json
 #import sqlite3
 import copy
+import logging
 
 class CountsPettioner(threading.Thread):
 	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter):
@@ -111,6 +112,7 @@ class CountsPettioner(threading.Thread):
 
 					now_min=self.get_min(now)
 				else:
+					logging.info(self.name+': The thread have woken up earlier')
 					raise AssertionError('The thread have woken up earlier')
 			time.sleep(60.0-time.time()%60)
 

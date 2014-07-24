@@ -177,6 +177,8 @@ def release_resources(port, port_bar, conn):
 
 if __name__=='__main__':
 	logging.basicConfig(filename='nmwp.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
+	logging.info('.........................')
+	logging.info('.........................')
 	logging.info('Started')
 
 	args=create_parser().parse_args()
