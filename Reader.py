@@ -147,7 +147,9 @@ class Reader(threading.Thread):
 			aux= self.port.inWaiting()
 			if aux==0:
 				aux=1
-			logging.info(self.name+': inWaiting()= '+`aux`)
+			if aux >= 2000:
+				logging.info(self.name+': inWaiting()= '+`aux`)
+
 			next=self.port.read(aux)
 			if not next:
 				break

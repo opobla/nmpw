@@ -179,6 +179,8 @@ def release_resources(port, port_bar, conn):
 if __name__=='__main__':
 	# Init the P8_42
 	GPIO.setup('P9_42', GPIO.OUT)
+	GPIO.output("P9_42", GPIO.LOW)
+	time.sleep(0.5)
 	GPIO.output("P9_42", GPIO.HIGH)
 
 	logging.basicConfig(filename='nmwp.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
