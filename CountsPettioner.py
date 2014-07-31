@@ -9,7 +9,7 @@ import copy
 import logging
 
 class CountsPettioner(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter):
+	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter, sensors_manager):
 		threading.Thread.__init__(self)
 		self.name='CountsPettioner'
 		self.port=port
@@ -19,6 +19,8 @@ class CountsPettioner(threading.Thread):
 		self.shared_events_data=shared_events_data
 	
 		self.database_adapter=database_adapter
+
+		self.sensors_manager=sensors_manager
 		
 	@staticmethod
 	def aux (array_to_json):
@@ -96,23 +98,26 @@ class CountsPettioner(threading.Thread):
 		binTable=self.shared_counts_data[:]	
 		return {'Counts':binTable,'EventsInfo':events_data}
 
+	def read_sensors(self):
+		sensors_data['atmPressure']=self.sensors_manager.read_pressure()
+		sensors_data['hv1'], sensors_data['hv2'], sensors_data['hv3']=self.sensors_manager.read_hvps()
+		sensors_data['temp_1'], sensors_data['temp_2']=self.sensors_manager.read_temp()
+		return sensors_data
+
+
 	def run(self):
 		now_min=None
 		while self.end_condition.is_set():
 			now=time.time()
 			if now_min==None:
 				now_min=self.get_min(now)
-				#  TODO Read the sensors data
-				sensors_data={'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+				sensors_data=self.read_sensors()
 
 			else:
 				if now_min+60 < now:   
 					data=self.request_get_Counts_EventsInfo(now_min)
-										
 					self.save_data(now_min, data, sensors_data) 
-					#  TODO Read the sensors data
-					sensors_data={'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
-
+					sensors_data=self.read_sensors()
 					now_min=self.get_min(now)
 				else:
 					logging.info(self.name+': The thread have woken up earlier')

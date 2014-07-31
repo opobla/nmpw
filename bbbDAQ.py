@@ -13,7 +13,7 @@ import sys
 
 from Reader import Reader
 from CountsPettioner import CountsPettioner
-#from ap1 import ap1
+from SensorsManager import SensorsManager
 
 def create_parser():
 	#Create the parser
@@ -21,7 +21,8 @@ def create_parser():
 	parser.add_argument('-sp','--serialPort',type=str, required=True, help='The port that will be used to read the data.')
 	parser.add_argument('-db','--database',type=str,default='shell',help='The database where the data will be stored, by default the data will be printed on the shell.')
 	parser.add_argument('-bm','--barometer',type=str,default=None,choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
-	parser.add_argument('-spb','--serialPortBar',type=str,default=None,help='The port the barometer will use to to deliver the data')
+	parser.add_argument('-sps','--serialPortSensors',type=str,default=None,help='The port the sensors will use to to deliver the data')
+	parser.add_argument('-hv','--highVoltagePS',type=str,default=None,choises=['digital','analog'],help='Analog or Digital high voltage power suplly')
 
 	return parser
 
@@ -128,33 +129,15 @@ def init_resources(args):
 	port=init_port(args.serialPort, args_baudrate=921600)
 
 	# Initialize the Serial Port for the barometer if one is needed.
-	#  TODO Pass the spb baudrate as parameter or leave it as it is now
-	port_bar=init_port(args.serialPortBar, args_baudrate=921600) #  TODO change the baudrate
+	#  TODO Pass the sps baudrate as parameter or leave it as it is now
+	port_sensors=init_port(args.serialPortSensors, args_baudrate=921600) #  TODO change the baudrate
 
 	# Initialize the Database connection
 	conn=init_database(args.database)
 
-	return port, port_bar, conn
+	return port, port_sensors, conn
 
-
-def init_ap1(end_condition, shared_pressure_data):
-	#  TODO init the thread itself and return it
-	return None
-
-def init_bm35(end_conditio, shared_pressure_data, port_bar):
-	#  TODO init the thread itself and return it
-	if port_bar==None:
-		raise AttributeError('The port_bar must be specified when using bm35 barometer')
-	return None
-
-def init_barometer(args_barometer, end_condition, shared_pressure_data, port_bar):
-	if args_barometer=='ap1':
-		return init_ap1(end_condition, shared_pressure_data)
-	if args_barometer=='bm35':
-		init_bm35(end_condition, shared_pressure_data, port_bar)
-
-
-def init_threads(port, args_barometer, port_bar, conn):
+def init_threads(port, args, port_sensors, conn):
 	# Initialize all threads
 	end_condition=threading.Event()
 	end_condition.set()
@@ -163,53 +146,50 @@ def init_threads(port, args_barometer, port_bar, conn):
 	counts_condition.acquire()
 	shared_counts_data=[]
 	shared_events_data=[]
-	shared_pressure_data=[]
+	shared_sensors_data=[]
+
+	sensors_manager=SensorManager('Sensor Manager', bar_type=args.barometer, hvps_type=args.highVoltagePS, port_control=port, port_data=port_sensors)
 
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
-	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn)
-	barometer=None
-	if args_barometer != None:
-		barometer=init_barometer(args_barometer, end_condition, shared_pressure_data, port_bar)
-
-	return reader, counts, barometer
+	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager)
 	
-def start_threads(reader, counts, barometer):
+	return reader, counts
+	
+def start_threads(reader, counts):
 	reader.start()
 	counts.start()
-	if barometer != None:
-		barometer.start()
 
-def end_threads(reader, counts, barometer):
+def end_threads(reader, counts):
 	reader.join()
 	counts._Thread__stop()
-	if barometer != None:
-		barometer._Thread__stop()
 
-def release_resources(port, port_bar, conn):
+def release_resources(port, port_sensors, conn):
 	port.close()
-	if port_bar != None:
-		port_bar.close()
+	if port_sensors != None:
+		port_sensors.close()
 	if conn!=None:
 		conn.close()
 
 
 if __name__=='__main__':
-	# Init the P8_42
+	# Init the P9_42. First we active the Reset signal for 0.5 secs and then we wait for a 4.0 secs that should be enough 
 	GPIO.setup('P9_42', GPIO.OUT)
 	GPIO.output("P9_42", GPIO.LOW)
 	time.sleep(0.5)
 	GPIO.output("P9_42", GPIO.HIGH)
+	time.sleep(4.0)
 
+	# Init the loogger and log we are starting the program
 	logging.basicConfig(filename='nmwp.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
 	logging.info('.........................')
 	logging.info('.........................')
 	logging.info('Started')
 
 	args=create_parser().parse_args()
-	port, port_bar, conn = init_resources(args)
+	port, port_sensors, conn = init_resources(args)
 
-	reader, counts, barometer= init_threads(port, args.barometer, port_bar, conn)
-	start_threads(reader, counts, barometer)
+	reader, counts= init_threads(port, args, port_sensors, conn)
+	start_threads(reader, counts)
 	
 	#For now this allows us to stop the threads relising the resources
 	def signal_handler(signal, frame):
@@ -221,10 +201,7 @@ if __name__=='__main__':
 	while reader.end_condition.is_set():
 		time.sleep(100000000000)
 
-	end_threads(reader, counts, barometer)
-	release_resources(port, port_bar, conn)
+	end_threads(reader, counts)
+	release_resources(port, port_sensors, conn)
 
 	logging.info('Correctly ended. bye')
-	
-	
-
