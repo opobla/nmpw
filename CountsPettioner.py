@@ -19,7 +19,7 @@ class CountsPettioner(threading.Thread):
 		self.shared_events_data=shared_events_data
 	
 		self.database_adapter=database_adapter
-
+		
 	@staticmethod
 	def aux (array_to_json):
 		b=json.dumps(array_to_json)
@@ -102,13 +102,16 @@ class CountsPettioner(threading.Thread):
 			now=time.time()
 			if now_min==None:
 				now_min=self.get_min(now)
+				#  TODO Read the sensors data
+				sensors_data={'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+
 			else:
 				if now_min+60 < now:   
 					data=self.request_get_Counts_EventsInfo(now_min)
-					#  TODO Pressure and HV sensors information.....
+										
+					self.save_data(now_min, data, sensors_data) 
+					#  TODO Read the sensors data
 					sensors_data={'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
-					
-					self.save_data(now_min, data, sensors_data)
 
 					now_min=self.get_min(now)
 				else:

@@ -136,6 +136,24 @@ def init_resources(args):
 
 	return port, port_bar, conn
 
+
+def init_ap1(end_condition, shared_pressure_data):
+	#  TODO init the thread itself and return it
+	return None
+
+def init_bm35(end_conditio, shared_pressure_data, port_bar):
+	#  TODO init the thread itself and return it
+	if port_bar==None:
+		raise AttributeError('The port_bar must be specified when using bm35 barometer')
+	return None
+
+def init_barometer(args_barometer, end_condition, shared_pressure_data, port_bar):
+	if args_barometer=='ap1':
+		return init_ap1(end_condition, shared_pressure_data)
+	if args_barometer=='bm35':
+		init_bm35(end_condition, shared_pressure_data, port_bar)
+
+
 def init_threads(port, args_barometer, port_bar, conn):
 	# Initialize all threads
 	end_condition=threading.Event()
@@ -145,14 +163,13 @@ def init_threads(port, args_barometer, port_bar, conn):
 	counts_condition.acquire()
 	shared_counts_data=[]
 	shared_events_data=[]
-	shared_pressure_data=None
+	shared_pressure_data=[]
 
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
 	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn)
 	barometer=None
 	if args_barometer != None:
-		# TODO init the barometer thread
-		barometer='just to test'
+		barometer=init_barometer(args_barometer, end_condition, shared_pressure_data, port_bar)
 
 	return reader, counts, barometer
 	
@@ -209,19 +226,5 @@ if __name__=='__main__':
 
 	logging.info('Correctly ended. bye')
 	
-def init_barometer(barometer_arg, end_condition, shared_pressure_data, port_arg):
-	return {
-        	'ap1': init_ap1(end_condition, shared_pressure_data),
-        	'bm35': {'barometer':None,'port':None},  #  TODO
-		None:{},
-        }[barometer_arg]  # The dafault value to return
 	
-def init_ap1(end_condition, shared_pressure_data):
-	ap1_bar=None#ap1(end_conditio, shared_pressure_data)
-	return {'barometer':ap1_bar}
 
-def init_bm35(end_conditio, shared_pressure_data, port_arg):
-	#  TODO init the port that will read the data
-	#  TODO init the thread itself and return it
-	#  return {'barometer':bm35_bar, 'port': the_press_port}	
-	print '' # just to make compilation posible

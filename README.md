@@ -25,14 +25,16 @@ nmpw
             root@beaglebone:~# systemctl enable ntpdate.service
             root@beaglebone:~# systemctl enable ntpd.service
 
-        
+	`#  TODO configure and enable systemctl service which starts the data acquisition software    
+
+	`#  TODO configure and enable systemctl service which starts the software which copies our database  
 
 
 **Beaglebone Black config**:
 
-        Enable UART2. 
+        Enable UART2, UART1 
             edit /media/BEAGLEBONE/uEnv.txt
-                should look like this:   optargs=quiet drm.debug=7 capemgr.enable_partno=BB-UART2 
+                should look like this:   optargs=quiet drm.debug=7 capemgr.enable_partno=BB-UART2,BB-UART1 
 
 
 **Install**: Software modules need for the data acquisition.
