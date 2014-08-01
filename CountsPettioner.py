@@ -99,6 +99,7 @@ class CountsPettioner(threading.Thread):
 		return {'Counts':binTable,'EventsInfo':events_data}
 
 	def read_sensors(self):
+		sensors_data={}
 		sensors_data['atmPressure']=self.sensors_manager.read_pressure()
 		sensors_data['hv1'], sensors_data['hv2'], sensors_data['hv3']=self.sensors_manager.read_hvps()
 		sensors_data['temp_1'], sensors_data['temp_2']=self.sensors_manager.read_temp()

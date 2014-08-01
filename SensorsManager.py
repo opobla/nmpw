@@ -2,15 +2,15 @@ from ap1 import ap1
 from bm35 import bm35
 
 class SensorsManager:
-	def __init__(self, name, bar_type=None, hvps_type=None, port_control=None, port_data=None)
+	def __init__(self, name, bar_type=None, hvps_type=None, port_control=None, port_data=None):
 		self.name=name
 		self.bar_type=bar_type
 		self.hvps_type=hvps_type
 		self.port_control=port_control
-		self.port_data=port.data
+		self.port_data=port_data
 
 		# Valid bar_type
-		if not(bar_type=='ap1' or bar_type=='bm35'):
+		if not(bar_type==None or bar_type=='ap1' or bar_type=='bm35'):
 			raise AttributeError('Invalid bar_type')
 
 		# The needed port are present
@@ -36,13 +36,13 @@ class SensorsManager:
 			pressure_raw=self.port_data.read(self.port_data.inWaiting())
 			pressure=bm35.bm35_parse_pressure_answer(pressure_raw[:-2])
 			return pressure
-		if self.bar_type='ap1':
+		if self.bar_type=='ap1':
 			pressure=ap1.ap1_read_pressure_using_strobe()
 			return pressure
 
 	def read_hvps(self):
 		if self.hvps_type==None:
-			return -1
+			return -1, -1, -1
 		if self.hvps_type=='digital':
 			self.port_control.write('\x01')
 			time.sleep(0.5)

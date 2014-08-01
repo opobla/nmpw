@@ -22,7 +22,7 @@ def create_parser():
 	parser.add_argument('-db','--database',type=str,default='shell',help='The database where the data will be stored, by default the data will be printed on the shell.')
 	parser.add_argument('-bm','--barometer',type=str,default=None,choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
 	parser.add_argument('-sps','--serialPortSensors',type=str,default=None,help='The port the sensors will use to to deliver the data')
-	parser.add_argument('-hv','--highVoltagePS',type=str,default=None,choises=['digital','analog'],help='Analog or Digital high voltage power suplly')
+	parser.add_argument('-hv','--highVoltagePS',type=str,default=None,choices=['digital','analog'],help='Analog or Digital high voltage power suplly')
 
 	return parser
 
@@ -148,7 +148,7 @@ def init_threads(port, args, port_sensors, conn):
 	shared_events_data=[]
 	shared_sensors_data=[]
 
-	sensors_manager=SensorManager('Sensor Manager', bar_type=args.barometer, hvps_type=args.highVoltagePS, port_control=port, port_data=port_sensors)
+	sensors_manager=SensorsManager('Sensor Manager', bar_type=args.barometer, hvps_type=args.highVoltagePS, port_control=port, port_data=port_sensors)
 
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
 	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager)
