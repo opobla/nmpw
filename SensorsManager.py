@@ -8,6 +8,9 @@ class SensorsManager:
 		self.hvps_type=hvps_type
 		self.port_control=port_control
 		self.port_data=port_data
+		if self.port_data!=None:
+			# 1.5 secs should be enough time
+			self.port_data.timeout=1.5 
 
 		# Valid bar_type
 		if not(bar_type==None or bar_type=='ap1' or bar_type=='bm35'):
@@ -32,8 +35,7 @@ class SensorsManager:
 			time.sleep(0.5)
 			self.port_data.flush()
 			bm35.bm35_request_pressure_reading(self.port_data)
-			time.sleep(1.5) # Enough time for the pressure to be send
-			pressure_raw=self.port_data.read(self.port_data.inWaiting())
+			pressure_raw=self.port_data.readline()
 			pressure=bm35.bm35_parse_pressure_answer(pressure_raw[:-2])
 			return pressure
 		if self.bar_type=='ap1':
@@ -48,24 +50,21 @@ class SensorsManager:
 			time.sleep(0.5)
 			self.port_data.flush()
 			# TODO request the data from the sensor
-			time.sleep(1.5) # Enough time for the sensor to respond
-			hvps1_raw=self.port_data.read(self.port_data.inWaiting())
+			hvps1_raw=self.port_data.readline()
 			hvps1=hvps1_raw #  TODO parse the raw value
 			
 			self.port_control.write('\x02')
 			time.sleep(0.5)
 			self.port_data.flush()
 			# TODO request the data from the sensor
-			time.sleep(1.5) # Enough time for the sensor to respond
-			hvps2_raw=self.port_data.read(self.port_data.inWaiting())
+			hvps2_raw=self.port_data.readline()
 			hvps2=hvps2_raw #  TODO parse the raw value
 
 			self.port_control.write('\x03')
 			time.sleep(0.5)
 			self.port_data.flush()
 			# TODO request the data from the sensor
-			time.sleep(1.5) # Enough time for the sensor to respond
-			hvps3_raw=self.port_data.read(self.port_data.inWaiting())
+			hvps3_raw=self.port_data.readline()
 			hvps3=hvps3_raw #  TODO parse the raw value
 
 			return hvps1, hvps2, hvps3
