@@ -172,12 +172,11 @@ def release_resources(port, port_sensors, conn):
 
 
 if __name__=='__main__':
-	# Init the P9_42. First we active the Reset signal for 0.5 secs and then we wait for a 4.0 secs that should be enough 
+	# Init the P9_42. First we active the Reset signal for 0.5 secs
 	GPIO.setup('P9_42', GPIO.OUT)
 	GPIO.output("P9_42", GPIO.LOW)
-	time.sleep(0.5)
+	#time.sleep(0.5)
 	GPIO.output("P9_42", GPIO.HIGH)
-	time.sleep(4.0)
 
 	# Init the loogger and log we are starting the program
 	logging.basicConfig(filename='nmwp.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
