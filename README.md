@@ -23,15 +23,15 @@ nmpw
 
 	Edit/Create /lib/systemd/system/nmpwDataAcquisition.service
 	    Contentt should be:
-		[Unit]
-		Description=NMPW Data Acquisition Service
-		After=ntpdate.service
+		    [Unit]
+		    Description=NMPW Data Acquisition Service
+		    After=ntpdate.service
 
-		[Service]
-		ExecStart=/usr/bin/python /server/nmpw/bbbDAQ.py -sp /dev/ttyO2 -db /server/data/test.db
+		    [Service]
+		    ExecStart=/usr/bin/python /server/nmpw/bbbDAQ.py -sp /dev/ttyO2 -db /server/data/test.db
 
-		[Install]
-		WantedBy=multi-user.target
+		    [Install]
+		    WantedBy=multi-user.target
 
 
         Enable ntp services
