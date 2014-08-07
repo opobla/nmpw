@@ -21,11 +21,23 @@ nmpw
             change line:
                 ExecStart=/usr/bin/ntpdate-sync silent  <-->  ExecStart=/usr/bin/ntpd -q -g -x
 
+	Edit/Create /lib/systemd/system/nmpwDataAcquisition.service
+	    Contentt should be:
+		[Unit]
+		Description=NMPW Data Acquisition Service
+		After=ntpdate.service
+
+		[Service]
+		ExecStart=/usr/bin/python /server/nmpw/bbbDAQ.py -sp /dev/ttyO2 -db /server/data/test.db
+
+		[Install]
+		WantedBy=multi-user.target
+
+
         Enable ntp services
             root@beaglebone:~# systemctl enable ntpdate.service
             root@beaglebone:~# systemctl enable ntpd.service
-
-	`#  TODO configure and enable systemctl service which starts the data acquisition software    
+	    root@beaglebone:~# systemctl enable nmpwDataAcquisition
 
 	`#  TODO configure and enable systemctl service which starts the software which copies our database  
 
