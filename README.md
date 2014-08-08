@@ -6,6 +6,13 @@ nmpw
 
 **Init_config**: These steps will allow us to configure your system so as to initialize correctly our data acquisition when the system is started. These allows the system to correctly recover from unexpected situations like power loss. The idea behind all this is to establish internet connection, synchronize the system time, and then run the data acquisition software.
 
+	Create the next folder tree
+	     /
+	     |---- server
+	           |---- nmpw    #Data Acquisition software, this repository
+	           |---- data    #Our data
+	           |---- logs    #Logs which give us information about the state of our system
+
         Install ntp if not installed
             root@beaglebone:~# opkg install ntp 
 
@@ -22,7 +29,7 @@ nmpw
                 ExecStart=/usr/bin/ntpdate-sync silent  <-->  ExecStart=/usr/bin/ntpd -q -g -x
 
 	Edit/Create /lib/systemd/system/nmpwDataAcquisition.service
-	    Contentt should be:
+	    Content should be:
 		    [Unit]
 		    Description=NMPW Data Acquisition Service
 		    After=ntpdate.service

@@ -122,6 +122,5 @@ class CountsPettioner(threading.Thread):
 					now_min=self.get_min(now)
 				else:
 					logging.info(self.name+': The thread have woken up earlier')
-					raise AssertionError('The thread have woken up earlier')
 			time.sleep(60.0-time.time()%60)
 

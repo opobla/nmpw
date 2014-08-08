@@ -179,7 +179,7 @@ if __name__=='__main__':
 	GPIO.output("P9_42", GPIO.HIGH)
 
 	# Init the loogger and log we are starting the program
-	logging.basicConfig(filename='nmwp.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
+	logging.basicConfig(filename='/server/logs/nmpw.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
 	logging.info('.........................')
 	logging.info('.........................')
 	logging.info('Started')
