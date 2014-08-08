@@ -17,12 +17,13 @@ class SensorsManager:
 			raise AttributeError('Invalid bar_type')
 
 		# The needed port are present
-		if self.name=='bm35' and (self.port_control==None or self.port_data==None):
+		if self.bar_type=='bm35' and (self.port_control==None or self.port_data==None):
 			raise AttributeError('In order to read data from a bm35 barometer we need two ports, one for control and one for data')
  
  		# Init the context for ap1
-		if self.name=='ap1':
+		if self.bar_type=='ap1':
 			ap1.ap1_init_strobe_reader()
+
 
 		#  TODO add the hvps_type validation and all that is needed
 
