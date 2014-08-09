@@ -1,4 +1,4 @@
-from ap1 import ap1
+import ap1
 from bm35 import bm35
 import analogHVPS
 
