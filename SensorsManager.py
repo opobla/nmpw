@@ -1,5 +1,5 @@
 import ap1
-from bm35 import bm35
+import bm35
 import analogHVPS
 
 class SensorsManager:
