@@ -34,7 +34,7 @@ class SensorsManager:
 			raise AttributeError('In order to read data from a digital hvps we need two ports, one for control and one for data')
 
 		# Init the context for analog barometers
-		if self.hvps=='analog':
+		if self.hvps_type=='analog':
 			analogHVPS.analogHVPS_init()
 
 
@@ -85,3 +85,4 @@ class SensorsManager:
 
 
 	def read_temp(self):
+		return -1, -1
