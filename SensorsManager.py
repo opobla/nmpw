@@ -1,5 +1,6 @@
 from ap1 import ap1
 from bm35 import bm35
+import analogHVPS
 
 class SensorsManager:
 	def __init__(self, name, bar_type=None, hvps_type=None, port_control=None, port_data=None):
@@ -13,7 +14,7 @@ class SensorsManager:
 			self.port_data.timeout=1.5 
 
 		# Valid bar_type
-		if not(bar_type==None or bar_type=='ap1' or bar_type=='bm35'):
+		if not(self.bar_type==None or self.bar_type=='ap1' or self.bar_type=='bm35'):
 			raise AttributeError('Invalid bar_type')
 
 		# The needed port are present
@@ -24,8 +25,17 @@ class SensorsManager:
 		if self.bar_type=='ap1':
 			ap1.ap1_init_strobe_reader()
 
+		# Valid hvps_type
+		if not(self.hvps_type==None or self.hvps_type=='digital' or self.hvps_type=='analog'):
+			raise AttributeError('Invalid hvps_type')
 
-		#  TODO add the hvps_type validation and all that is needed
+		# The needed port are present
+		if self.hvps_type=='digital' and (self.port_control==None or self.port_data==None):
+			raise AttributeError('In order to read data from a digital hvps we need two ports, one for control and one for data')
+
+		# Init the context for analog barometers
+		if self.hvps=='analog':
+			analogHVPS.analogHVPS_init()
 
 
 	def read_pressure(self):
@@ -45,7 +55,7 @@ class SensorsManager:
 
 	def read_hvps(self):
 		if self.hvps_type==None:
-			return -1, -1, -1
+			return -1, -1, -1, -1
 		if self.hvps_type=='digital':
 			self.port_control.write('\x01')
 			time.sleep(0.5)
@@ -68,11 +78,10 @@ class SensorsManager:
 			hvps3_raw=self.port_data.readline()
 			hvps3=hvps3_raw #  TODO parse the raw value
 
-			return hvps1, hvps2, hvps3
+			# We can only read three digital hvps, so we return a -1 for the fourth one.
+			return hvps1, hvps2, hvps3, -1
 		if self.hvps_type=='analog':
-			#  TODO Do it
-			return -1
+			return analogHVPS.analogHVPS_read()
 
 
 	def read_temp(self):
-		return -1, -1

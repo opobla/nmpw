@@ -61,6 +61,7 @@ def init_database(args_database):
 					 'hv1' int(11) DEFAULT NULL,\
 					 'hv2' int(11) DEFAULT NULL,\
 					 'hv3' int(11) DEFAULT NULL,\
+					 'hv4' int(11) DEFAULT NULL,\
 					 'temp_1' int(11) DEFAULT NULL,\
 					 'temp_2' int(11) DEFAULT NULL,\
 					 'atmPressure' int(11) DEFAULT NULL,\
@@ -90,6 +91,7 @@ def init_database(args_database):
 					 'hv1' int(11) DEFAULT NULL,\
 					 'hv2' int(11) DEFAULT NULL,\
 					 'hv3' int(11) DEFAULT NULL,\
+					 'hv4' int(11) DEFAULT NULL,\
 					 'temp_1' int(11) DEFAULT NULL,\
 					 'temp_2' int(11) DEFAULT NULL,\
 					 'atmPressure' int(11) DEFAULT NULL,\

@@ -52,7 +52,7 @@ class CountsPettioner(threading.Thread):
 		if self.database_adapter==None:
 			print 'start_date_time:', time_entry, 'Counts:', binTable, 'Sensors:', sensors
 		else:
-			sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTable[0]`+", "+`binTable[1]`+", "+`binTable[2]`+", "+`binTable[3]`+", "+`binTable[4]`+", "+`binTable[5]`+", "+`binTable[6]`+", "+`binTable[7]`+", "+`binTable[8]`+", "+`binTable[9]`+", "+`binTable[10]`+", "+`binTable[11]`+", "+`binTable[12]`+", "+`binTable[13]`+", "+`binTable[14]`+", "+`binTable[15]`+", "+`binTable[16]`+", "+`binTable[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
+			sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTable[0]`+", "+`binTable[1]`+", "+`binTable[2]`+", "+`binTable[3]`+", "+`binTable[4]`+", "+`binTable[5]`+", "+`binTable[6]`+", "+`binTable[7]`+", "+`binTable[8]`+", "+`binTable[9]`+", "+`binTable[10]`+", "+`binTable[11]`+", "+`binTable[12]`+", "+`binTable[13]`+", "+`binTable[14]`+", "+`binTable[15]`+", "+`binTable[16]`+", "+`binTable[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['hv4']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
 			self.database_adapter.execute(sql)
 			self.database_adapter.commit()
 
@@ -62,7 +62,7 @@ class CountsPettioner(threading.Thread):
 		if self.database_adapter==None:
 			print 'start_date_time:', time_entry, 'CountsFromEvents:', binTableFromEvents, 'Sensors:', sensors
 		else:
-			sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTableFromEvents[0]`+", "+`binTableFromEvents[1]`+", "+`binTableFromEvents[2]`+", "+`binTableFromEvents[3]`+", "+`binTableFromEvents[4]`+", "+`binTableFromEvents[5]`+", "+`binTableFromEvents[6]`+", "+`binTableFromEvents[7]`+", "+`binTableFromEvents[8]`+", "+`binTableFromEvents[9]`+", "+`binTableFromEvents[10]`+", "+`binTableFromEvents[11]`+", "+`binTableFromEvents[12]`+", "+`binTableFromEvents[13]`+", "+`binTableFromEvents[14]`+", "+`binTableFromEvents[15]`+", "+`binTableFromEvents[16]`+", "+`binTableFromEvents[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
+			sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTableFromEvents[0]`+", "+`binTableFromEvents[1]`+", "+`binTableFromEvents[2]`+", "+`binTableFromEvents[3]`+", "+`binTableFromEvents[4]`+", "+`binTableFromEvents[5]`+", "+`binTableFromEvents[6]`+", "+`binTableFromEvents[7]`+", "+`binTableFromEvents[8]`+", "+`binTableFromEvents[9]`+", "+`binTableFromEvents[10]`+", "+`binTableFromEvents[11]`+", "+`binTableFromEvents[12]`+", "+`binTableFromEvents[13]`+", "+`binTableFromEvents[14]`+", "+`binTableFromEvents[15]`+", "+`binTableFromEvents[16]`+", "+`binTableFromEvents[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['hv4']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
 			self.database_adapter.execute(sql)
 			self.database_adapter.commit()
 			
@@ -101,7 +101,7 @@ class CountsPettioner(threading.Thread):
 	def read_sensors(self):
 		sensors_data={}
 		sensors_data['atmPressure']=self.sensors_manager.read_pressure()
-		sensors_data['hv1'], sensors_data['hv2'], sensors_data['hv3']=self.sensors_manager.read_hvps()
+		sensors_data['hv1'], sensors_data['hv2'], sensors_data['hv3'], sensors_data['hv4']=self.sensors_manager.read_hvps()
 		sensors_data['temp_1'], sensors_data['temp_2']=self.sensors_manager.read_temp()
 		return sensors_data
 
