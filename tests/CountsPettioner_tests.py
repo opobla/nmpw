@@ -36,7 +36,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 	def test_OutPut_save_BinTable(self):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
-		CP_instance=CP(None, None, None, None, None, database_adapter)
+		CP_instance=CP(None, None, None, None, None, database_adapter, None)
 		with capture(CP_instance.save_BinTable,1405516380.0, [23,12,45,23,12,67], [1,2]) as output:
 			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 Counts: [23, 12, 45, 23, 12, 67] Sensors: [1, 2]\n')		
 
@@ -47,8 +47,8 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database.commit.return_value=True
 
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
-		CP_instance=CP(None, None, None, None, None, database)
-		CP_instance.save_BinTable(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+		CP_instance=CP(None, None, None, None, None, database, None)
+		CP_instance.save_BinTable(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'hv4':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
 )
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
@@ -56,7 +56,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 	def test_OutPut_save_BinTableFromEvents(self):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
-		CP_instance=CP(None, None, None, None, None, database_adapter)
+		CP_instance=CP(None, None, None, None, None, database_adapter, None)
 		with capture(CP_instance.save_BinTableFromEvents,1405516380.0, [23,12,45,23,12,67], [1,2]) as output:
 			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 CountsFromEvents: [23, 12, 45, 23, 12, 67] Sensors: [1, 2]\n')		
 
@@ -67,8 +67,8 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database.commit.return_value=True
 
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
-		CP_instance=CP(None, None, None, None, None, database)
-		CP_instance.save_BinTableFromEvents(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
+		CP_instance=CP(None, None, None, None, None, database, None)
+		CP_instance.save_BinTableFromEvents(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'hv4':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
 )
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
@@ -78,7 +78,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 	def test_OutPut_save_EventsInfo(self):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
-		CP_instance=CP(None, None, None, None, None, database_adapter)
+		CP_instance=CP(None, None, None, None, None, database_adapter, None)
 		with capture(CP_instance.save_EventsInfo,1405516380.0,[None,'To_print_histo','To_print_Low','To_print_Overflows']) as output:
 			self.assertEqual(output, '\nstart_date_time: 2014-07-16 15:04:00 \nhistograms: To_print_histo \nlowlevels: To_print_Low \noverflows: To_print_Overflows\n')
 		
@@ -89,13 +89,13 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database.commit.return_value=True
 	
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
-		CP_instance=CP(None, None, None, None, None, database)
+		CP_instance=CP(None, None, None, None, None, database, None)
 		CP_instance.save_EventsInfo(1405516380.0,[None,[[4 for x in xrange(128)] for x in xrange(18)],[4 for x in xrange(18)],[0 for x in xrange(18)]])
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
 
 	def test_Calls_save_data(self):
-		CP_instance=CP(None, None, None, None, None, None)
+		CP_instance=CP(None, None, None, None, None, None, None)
 		CP_instance.save_BinTable=MagicMock(return_value=True)
 		CP_instance.save_BinTableFromEvents=MagicMock(return_value=True)
 		CP_instance.save_EventsInfo=MagicMock(return_value=True)
@@ -125,7 +125,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		self.assertEqual(response,120.0)
 
 	def test_Constructor(self):
-		myCP=CP('Hi','There',{'some_numbers':[1,2,3,4,]},4,5,6)
+		myCP=CP('Hi','There',{'some_numbers':[1,2,3,4,]},4,5,6, None)
 		self.assertEqual(myCP.name,'CountsPettioner','CountsPettioner Constructor behaving incorrectly')
 		self.assertEqual(myCP.port,'Hi','CountsPettioner Constructor behaving incorrectly')
 		self.assertEqual(myCP.end_condition,'There','CountsPettioner Constructor behaving incorrectly')
@@ -144,7 +144,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		port=counts_condition
 		port.write.return_value=True
 		
-		CP_instance=CP(port, None, counts_condition, shared_counts_data, shared_events_data, None)
+		CP_instance=CP(port, None, counts_condition, shared_counts_data, shared_events_data, None, None)
 		CP_instance.copy_and_reset=MagicMock(return_value='Hi')
 
 		responce=CP_instance.request_get_Counts_EventsInfo(123.0)
@@ -177,18 +177,20 @@ class CountsPettionerTestCase(unittest.TestCase):
 		reload(CountsPettioner)  
 
 		# Create CountsPettioner and mock the methods called inside the run loop
-		CP_instance=CP(None, end_condition, None, None, None, None)
+		CP_instance=CP(None, end_condition, None, None, None, None, None)
 		aux=MagicMock()
 		aux.request_get_Counts_EventsInfo.return_value='Potato'
 		aux.save_data.return_value=True
+		aux.read_sensors.return_value='Potato2'
 		CP_instance.request_get_Counts_EventsInfo=aux.request_get_Counts_EventsInfo
 		CP_instance.save_data=aux.save_data
+		CP_instance.read_sensors=aux.read_sensors
 	
 		CP_instance.run()
 		
 		end_condition.is_set.assert_called_with()
 		time.sleep.assert_has_calls([call(60.0-40.9),call(120.0-68.8)])
-		aux.assert_has_calls([call.request_get_Counts_EventsInfo(0.0),call.save_data(0.0, 'Potato', mock.ANY)], any_order=False)
+		aux.assert_has_calls([call.request_get_Counts_EventsInfo(0.0),call.save_data(0.0, 'Potato', 'Potato2')], any_order=False)
 
 
 	def test_run_loop_error(self):
@@ -196,6 +198,10 @@ class CountsPettionerTestCase(unittest.TestCase):
 		time=MagicMock()
 		time.sleep.return_value=True		
 		time.time.side_effect=ReturnSequence([40.7,40.9,59.7,59.8],0.0)
+
+		#Mock the logging
+		logging=MagicMock()
+		logging.info.return_value=True
 
 		# Mock the end condition
 		end_condition=MagicMock()
@@ -206,17 +212,26 @@ class CountsPettionerTestCase(unittest.TestCase):
 		import CountsPettioner
 		reload(CountsPettioner)  
 
+		# Make the CpuntsPettioner use the mocked logging
+		sys.modules['logging'] = logging
+		import CountsPettioner
+		reload(CountsPettioner)
+
+
 		# Create CountsPettioner and mock the methods called inside the run loop
-		CP_instance=CP(None, end_condition, None, None, None, None)
+		CP_instance=CP(None, end_condition, None, None, None, None, None)
 
 		aux=MagicMock()
 		aux.request_get_Counts_EventsInfo.return_value='Potato'
 		aux.save_data.return_value=True
+		aux.read_sensors.return_value='Potato2'
 		CP_instance.request_get_Counts_EventsInfo=aux.request_get_Counts_EventsInfo
 		CP_instance.save_data=aux.save_data
+		CP_instance.read_sensors=aux.read_sensors
 	
-		# the CountsPettioner thread should wake up once every minute. With this test we assert if an error is correctly raised when the thread wakes up twice in one minute
-		self.assertRaisesRegexp(AssertionError,'The thread have woken up earlier', CP_instance.run)
+		CP_instance.run()
+		# the CountsPettioner thread should wake up once every minute. With this test we assert if an error is correctly logged when the thread wakes up twice in the same minute
+		logging.info.assert_called_with(mock.ANY)
 
 
 

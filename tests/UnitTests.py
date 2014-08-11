@@ -26,7 +26,7 @@ if __name__ == '__main__':
 	#  TODO add arguments wih argparse which will allow us to test different units.
 	allTests=unittest.TestSuite()
 	allTests.addTests(bm35_suite())
-#	allTests.addTests(CountsPettioner_suite())
+	allTests.addTests(CountsPettioner_suite())
 #	allTests.addTests(Reader_suite())
 #	allTests.addTests(bbbDAQ_suite())
 	
