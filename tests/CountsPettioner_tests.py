@@ -233,6 +233,24 @@ class CountsPettionerTestCase(unittest.TestCase):
 		# the CountsPettioner thread should wake up once every minute. With this test we assert if an error is correctly logged when the thread wakes up twice in the same minute
 		logging.info.assert_called_with(mock.ANY)
 
+	def test_Calls_read_sensors(self):
+		#Mock the sensors_manager
+		sensors_manager=MagicMock()
+		sensors_manager.read_pressure.return_value=11
+		sensors_manager.read_hvps.return_value=22, 33, 44 ,55
+		sensors_manager.read_temp.return_value=66, 77
+
+		CP_instance=CP(None, None, None, None, None, None, sensors_manager)
+		returned_value=CP_instance.read_sensors()
+		
+		sensors_manager.read_pressure.assert_called_with()
+		sensors_manager.read_hvps.assert_called_with()
+		sensors_manager.read_temp.assert_called_with()
+
+		self.assertEqual(returned_value, {'atmPressure': 11, 'hv1':22, 'hv2':33, 'hv3':44, 'hv4':55, 'temp_1':66, 'temp_2':77})
+		
+		
+
 
 
 
