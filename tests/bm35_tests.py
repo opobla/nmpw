@@ -2,7 +2,7 @@ import unittest
 from mock import MagicMock
 import sys
 sys.path.append('.')
-from bm35 import bm35
+import bm35
 
 class bm35TestCase(unittest.TestCase):
 	def test_Equality_compute_crc(self):
