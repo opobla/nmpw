@@ -19,16 +19,12 @@ class SensorsManager:
 		if not(self.bar_type==None or self.bar_type=='ap1' or self.bar_type=='bm35'):
 			raise AttributeError('Invalid bar_type')
 
-		# The needed port are present
-		if self.bar_type=='bm35' and (self.port_control==None or self.port_data==None):
-			raise AttributeError('In order to read data from a bm35 barometer we need two ports, one for control and one for data')
- 
 		# Valid hvps_type
 		if not(self.hvps_type==None or self.hvps_type=='digital' or self.hvps_type=='analog'):
 			raise AttributeError('Invalid hvps_type')
 
 		# The needed port are present
-		if self.hvps_type=='digital' and (self.port_control==None or self.port_data==None):
+		if (self.hvps_type=='digital' or self.bar_type=='bm35') and (self.port_control==None or self.port_data==None):
 			raise AttributeError('In order to read data from a digital hvps we need two ports, one for control and one for data')
 
 	
@@ -58,7 +54,7 @@ class SensorsManager:
 			self.port_data.flush()
 			bm35.bm35_request_pressure_reading(self.port_data)
 			pressure_raw=self.port_data.readline()
-			pressure=bm35.bm35_parse_pressure_answer(pressure_raw[:-2])
+			pressure=bm35.bm35_parse_pressure_answer(pressure_raw)
 			return pressure
 		if self.bar_type=='ap1':
 			pressure=ap1.ap1_read_pressure_using_strobe()
