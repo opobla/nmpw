@@ -27,19 +27,32 @@ class ReaderTestCase(unittest.TestCase):
 		reader=Reader(None, end_condition, None, [], [])
 		reader.run()
 		
-	# With this test we assert that we read byte by byte and that the execution stops when a None value is read from the port
+	# With this test we assert that we the number of bytes that are available and when there is no available bytes we read one byte, which blocks us until a byte is received.
 	def test_read_one_byte(self):
 		end_condition=MagicMock()
 		end_condition.is_set.side_effect=ReturnSequence([], True)
 		
 		port=MagicMock()
 		port.read.return_value=None		
+		port.inWaiting.return_value='Potato'
+
+		reader=Reader(port , end_condition, None, [], [])
+		reader.run()
+
+		port.read.assert_called_with('Potato')
+
+		end_condition=MagicMock()
+		end_condition.is_set.side_effect=ReturnSequence([], True)
+		
+		port=MagicMock()
+		port.read.return_value=None		
+		port.inWaiting.return_value=0
 
 		reader=Reader(port , end_condition, None, [], [])
 		reader.run()
 
 		port.read.assert_called_with(1)
-	
+
 	# OverFlow on all the channels
 	def test_overflow_read(self):
 		end_condition=MagicMock()
