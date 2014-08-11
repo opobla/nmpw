@@ -8,6 +8,7 @@ import unittest
 from bm35_tests import bm35TestCase
 from CountsPettioner_tests import CountsPettionerTestCase
 from Reader_tests import ReaderTestCase
+from SensorsManager_tests import SensorsManagerTestCase
 #from bbbDAQ_tests import bbbDAQTestCase
 
 def bm35_suite():
@@ -19,6 +20,9 @@ def CountsPettioner_suite():
 def Reader_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(ReaderTestCase)
 
+def SensorsManager_suite():
+	return unittest.TestLoader().loadTestsFromTestCase(SensorsManagerTestCase)
+
 def bbbDAQ_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(bbbDAQTestCase)
 
@@ -28,6 +32,7 @@ if __name__ == '__main__':
 	allTests.addTests(bm35_suite())
 	allTests.addTests(CountsPettioner_suite())
 	allTests.addTests(Reader_suite())
+	allTests.addTests(SensorsManager_suite())
 #	allTests.addTests(bbbDAQ_suite())
 	
 	unittest.TextTestRunner(verbosity=2).run(allTests)

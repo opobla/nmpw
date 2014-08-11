@@ -9,10 +9,12 @@ class SensorsManager:
 		self.hvps_type=hvps_type
 		self.port_control=port_control
 		self.port_data=port_data
-		if self.port_data!=None:
-			# 1.5 secs should be enough time
-			self.port_data.timeout=1.5 
+		
+		self.validate_attributes()
+		self.init_resources()
 
+			
+	def validate_attributes(self):
 		# Valid bar_type
 		if not(self.bar_type==None or self.bar_type=='ap1' or self.bar_type=='bm35'):
 			raise AttributeError('Invalid bar_type')
@@ -21,10 +23,6 @@ class SensorsManager:
 		if self.bar_type=='bm35' and (self.port_control==None or self.port_data==None):
 			raise AttributeError('In order to read data from a bm35 barometer we need two ports, one for control and one for data')
  
- 		# Init the context for ap1
-		if self.bar_type=='ap1':
-			ap1.ap1_init_strobe_reader()
-
 		# Valid hvps_type
 		if not(self.hvps_type==None or self.hvps_type=='digital' or self.hvps_type=='analog'):
 			raise AttributeError('Invalid hvps_type')
@@ -33,9 +31,22 @@ class SensorsManager:
 		if self.hvps_type=='digital' and (self.port_control==None or self.port_data==None):
 			raise AttributeError('In order to read data from a digital hvps we need two ports, one for control and one for data')
 
+	
+	def init_resources(self):
+		# Set a timeout for the data port
+		if self.port_data!=None:
+			# 1.5 secs should be enough time
+			self.port_data.timeout=1.5 
+
+	 	# Init the context for ap1
+		if self.bar_type=='ap1':
+			ap1.ap1_init_strobe_reader()
+
 		# Init the context for analog barometers
 		if self.hvps_type=='analog':
 			analogHVPS.analogHVPS_init()
+
+
 
 
 	def read_pressure(self):
