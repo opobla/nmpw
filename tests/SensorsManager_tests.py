@@ -103,3 +103,44 @@ class SensorsManagerTestCase(unittest.TestCase):
 		SM_instance.port_data=None
 		SensorsManager.SensorsManager.init_resources(SM_instance)
 		analogHVPS.analogHVPS_init.assert_called_with()
+
+	def test_read_pressure(self):
+		# Returned value when no barometer is specified
+		SM_instance=SensorsManager.SensorsManager('The_name', None, None, None, None)	
+		read_pressure=SM_instance.read_pressure()
+		self.assertEqual(read_pressure, -1)
+
+		# Returned value when bm35 barometer is specified
+		time=MagicMock()
+		time.sleep.return_value=True
+		sys.modules['time'] = time
+		reload(SensorsManager)
+
+		port_control=MagicMock()
+		port_control.write.return_value=True
+		port_data=MagicMock()
+		port_data.flush.return_value=True
+		port_data.readline.return_value='M99D17.07.2014,12:47,85661,11555,0768'
+
+		SM_instance=SensorsManager.SensorsManager('The_name', 'bm35', None, port_control, port_data)
+		read_pressure=SM_instance.read_pressure()
+		self.assertEqual(read_pressure, 85661)
+
+		# Returned value when ap1 barometer is specfied
+		ap1=MagicMock()
+		ap1.ap1_read_pressure_using_strobe.return_value=88888	
+		sys.modules['ap1']=ap1
+		reload(SensorsManager)
+
+		SM_instance=SensorsManager.SensorsManager('The_name', 'ap1', None, None, None)
+		read_pressure=SM_instance.read_pressure()
+		self.assertEqual(read_pressure, 88888)
+		
+	def test_read_hvps(self):
+		# Resturned value when no hvps is specified
+		SM_instance=SensorsManager.SensorsManager('The_name', None, None, None, None)
+		read_hvps1, read_hvps2, read_hvps3, read_hvps4=SM_instance.read_hvps()
+		self.assertEqual(read_hvps1, -1)
+		self.assertEqual(read_hvps2, -1)
+		self.assertEqual(read_hvps3, -1)
+		self.assertEqual(read_hvps4, -1)
