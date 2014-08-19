@@ -1,6 +1,7 @@
 import Adafruit_BBIO.GPIO as GPIO
 import logging
 import argparse
+import ConfigParser
 import time
 import threading
 from time import strftime
@@ -17,12 +18,33 @@ from SensorsManager import SensorsManager
 
 def create_parser():
 	#Create the parser
+
+	config = ConfigParser.SafeConfigParser()
+	try:
+    		config.read(['.nmpw.conf'])
+    		basics = dict(config.items("Basics"))
+		sensors = dict(config.items("Sensors"))
+		defaults = dict(basics.items() + sensors.items())
+	
+	except:
+		print 'Probably the .nmpw.conf file is not configured. The nmpw.conf.example is an example file of how to config the .nmpw.conf file'
+		logging.info('Probably the .nmpw.conf file is not configured. The nmpw.conf.example is an example file of how to config the .nmpw.conf file')
+		print 'Exiting'
+		logging.info('Exiting')
+		sys.exit(0)
+
+	# Simple cast
+	for key in defaults:
+		if defaults[key]=='None':
+			defaults[key]=None
+
 	parser = argparse.ArgumentParser(description="Launch the python module for the new pulse width core for the neutron monitors.")
-	parser.add_argument('-sp','--serialPort',type=str, required=True, help='The port that will be used to read the data.')
-	parser.add_argument('-db','--database',type=str,default='shell',help='The database where the data will be stored, by default the data will be printed on the shell.')
-	parser.add_argument('-bm','--barometer',type=str,default=None,choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
-	parser.add_argument('-sps','--serialPortSensors',type=str,default=None,help='The port the sensors will use to to deliver the data')
-	parser.add_argument('-hv','--highVoltagePS',type=str,default=None,choices=['digital','analog'],help='Analog or Digital high voltage power suplly')
+	parser.set_defaults(**defaults)
+	parser.add_argument('-sp','--serial_port_control', help='The port that will be used to read the data.')
+	parser.add_argument('-db','--database', help='The database where the data will be stored, by default the data will be printed on the shell.')
+	parser.add_argument('-sps','--serial_port_sensors', help='The port the sensors will use to deliver their data')
+	parser.add_argument('-bm','--barometer_type', choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
+	parser.add_argument('-hv','--hvps_type', choices=['digital','analog'],help='Analog or Digital high voltage power suplly')
 
 	return parser
 

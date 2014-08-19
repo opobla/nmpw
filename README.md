@@ -13,6 +13,13 @@ nmpw
                    |---- data    #Our data
                    |---- logs    #Logs which give us information about the state of our system
 
+
+        Configure the config file.
+            Edit/Create /server/nmpw/.nmpw.conf
+            Or you can copy the exmaple file:
+                cp /server/nmpw/nmpw.conf.exmaple /server/nmpw/.nmpw.conf
+
+
         Install ntp if not installed
             root@beaglebone:~# opkg install ntp 
 
@@ -35,7 +42,7 @@ nmpw
         	    After=ntpdate.service
 
         	    [Service]
-        	    ExecStart=/usr/bin/python /server/nmpw/bbbDAQ.py -sp /dev/ttyO2 -db /server/data/test.db
+        	    ExecStart=/usr/bin/python /server/nmpw/bbbDAQ.py
 
         	    [Install]
         	    WantedBy=multi-user.target
@@ -44,7 +51,7 @@ nmpw
         Enable ntp services
             root@beaglebone:~# systemctl enable ntpdate.service
             root@beaglebone:~# systemctl enable ntpd.service
-	    root@beaglebone:~# systemctl enable nmpwDataAcquisition
+            root@beaglebone:~# systemctl enable nmpwDataAcquisition
 
 	`#  TODO configure and enable systemctl service which starts the software which copies our database  
 

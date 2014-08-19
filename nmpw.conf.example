@@ -1,0 +1,13 @@
+[Basics]
+# The serial RS232_FPGA1C
+serial_port_control  = /dev/ttyO2
+# The local database where data will be saved. If 'shell' is specified as database data will be printed to the shell
+database = /server/data/test.db
+
+[Sensors]
+# The serial RS232_FPGA1
+serial_port_sensors= None
+# The type of barometer that will be used. 'None', 'bm35', 'ap1'
+barometer_type = None
+# The type of hvps that will be used. 'None', 'analog', 'digital'
+hvps_type = None
