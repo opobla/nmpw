@@ -21,7 +21,7 @@ def create_parser():
 
 	config = ConfigParser.SafeConfigParser()
 	try:
-    		config.read(['.nmpw.conf'])
+    		config.read(['/server/nmpw/.nmpw.conf'])
     		basics = dict(config.items("Basics"))
 		sensors = dict(config.items("Sensors"))
 		defaults = dict(basics.items() + sensors.items())
@@ -150,11 +150,11 @@ def init_database(args_database):
 
 def init_resources(args):
 	# Initialize the Serial Port
-	port=init_port(args.serialPort, args_baudrate=921600)
+	port=init_port(args.serial_port_control, args_baudrate=921600)
 
 	# Initialize the Serial Port for the barometer if one is needed.
 	#  TODO Pass the sps baudrate as parameter or leave it as it is now
-	port_sensors=init_port(args.serialPortSensors, args_baudrate=921600) #  TODO change the baudrate
+	port_sensors=init_port(args.serial_port_sensors, args_baudrate=921600) #  TODO change the baudrate
 
 	# Initialize the Database connection
 	conn=init_database(args.database)
@@ -172,7 +172,7 @@ def init_threads(port, args, port_sensors, conn):
 	shared_events_data=[]
 	shared_sensors_data=[]
 
-	sensors_manager=SensorsManager('Sensor Manager', bar_type=args.barometer, hvps_type=args.highVoltagePS, port_control=port, port_data=port_sensors)
+	sensors_manager=SensorsManager('Sensor Manager', bar_type=args.barometer_type, hvps_type=args.hvps_type, port_control=port, port_data=port_sensors)
 
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
 	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager)
