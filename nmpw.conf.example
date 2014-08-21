@@ -11,3 +11,13 @@ serial_port_sensors= None
 barometer_type = None
 # The type of hvps that will be used. 'None', 'analog', 'digital'
 hvps_type = None
+
+[dbUpdater]
+db_updater_enabled=True
+# Must be the same that Basic.database
+local_db= /server/data/test.db 
+# The remote database config
+remote_db_host= localhost
+remote_db_user= hristo
+remote_db_pass= pass
+remote_db_db= nmpwdb

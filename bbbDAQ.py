@@ -24,7 +24,8 @@ def create_parser():
     		config.read(['/server/nmpw/.nmpw.conf'])
     		basics = dict(config.items("Basics"))
 		sensors = dict(config.items("Sensors"))
-		defaults = dict(basics.items() + sensors.items())
+		dbUpdater = dict(config.items("dbUpdater"))
+		defaults = dict(basics.items() + sensors.items() + dbUpdater.items())
 	
 	except:
 		print 'Probably the .nmpw.conf file is not configured. The nmpw.conf.example is an example file of how to config the .nmpw.conf file'
@@ -37,14 +38,25 @@ def create_parser():
 	for key in defaults:
 		if defaults[key]=='None':
 			defaults[key]=None
+		if defaults[key]=='True':
+			defaults[key]=True
+		if defaults[key]=='False':
+			defaults[key]=False
 
 	parser = argparse.ArgumentParser(description="Launch the python module for the new pulse width core for the neutron monitors.")
 	parser.set_defaults(**defaults)
-	parser.add_argument('-sp','--serial_port_control', help='The port that will be used to read the data.')
-	parser.add_argument('-db','--database', help='The database where the data will be stored, by default the data will be printed on the shell.')
-	parser.add_argument('-sps','--serial_port_sensors', help='The port the sensors will use to deliver their data')
-	parser.add_argument('-bm','--barometer_type', choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
-	parser.add_argument('-hv','--hvps_type', choices=['digital','analog'],help='Analog or Digital high voltage power suplly')
+	parser.add_argument('-sp',  '--serial_port_control', help='The port that will be used to read the data.')
+	parser.add_argument('-db',  '--database', help='The database where the data will be stored, by default the data will be printed on the shell.')
+	parser.add_argument('-sps', '--serial_port_sensors', help='The port the sensors will use to deliver their data')
+	parser.add_argument('-bm',  '--barometer_type', choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
+	parser.add_argument('-hv',  '--hvps_type', choices=['digital','analog'],help='Analog or Digital high voltage power suplly')
+
+	parser.add_argument('-dbU', '--db_updater_enabled')
+	parser.add_argument('-ldb', '--local_db')
+	parser.add_argument('-rh',  '--remote_db_host', help='The host where the remote dabase is.')
+	parser.add_argument('-ru',  '--remote_db_user')
+	parser.add_argument('-rp',  '--remote_db_pass')
+	parser.add_argument('-rdb', '--remote_db_db')
 
 	return parser
 
@@ -174,8 +186,12 @@ def init_threads(port, args, port_sensors, conn):
 
 	sensors_manager=SensorsManager('Sensor Manager', bar_type=args.barometer_type, hvps_type=args.hvps_type, port_control=port, port_data=port_sensors)
 
+	dbUpConf=None
+	if args.db_updater_enabled==True:
+		dbUpConf={'local':{'name':args.local_db}, 'remote':{'host':args.remote_db_host, 'user':args.remote_db_user, 'pass':args.remote_db_pass, 'database': args.remote_db_db}}
+	
 	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
-	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager)
+	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager, dbUpConf)
 	
 	return reader, counts
 	
@@ -196,18 +212,18 @@ def release_resources(port, port_sensors, conn):
 
 
 if __name__=='__main__':
-	# Init the P9_42. First we active the Reset signal for 0.5 secs
-	GPIO.setup('P9_42', GPIO.OUT)
-	GPIO.output("P9_42", GPIO.LOW)
-	#time.sleep(0.5)
-	GPIO.output("P9_42", GPIO.HIGH)
-
 	# Init the loogger and log we are starting the program
 	logging.basicConfig(filename='/server/logs/nmpw.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
 	logging.info('.........................')
 	logging.info('.........................')
 	logging.info('Started')
 
+	# Init the P9_42. First we active the Reset signal for 0.5 secs
+	GPIO.setup('P9_42', GPIO.OUT)
+	GPIO.output("P9_42", GPIO.LOW)
+	time.sleep(0.5)
+	GPIO.output("P9_42", GPIO.HIGH)
+	
 	args=create_parser().parse_args()
 	port, port_sensors, conn = init_resources(args)
 

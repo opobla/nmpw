@@ -8,8 +8,10 @@ import json
 import copy
 import logging
 
+from dbUpdater import dbUpdater
+
 class CountsPettioner(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter, sensors_manager):
+	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter, sensors_manager, dbUpConf):
 		threading.Thread.__init__(self)
 		self.name='CountsPettioner'
 		self.port=port
@@ -21,6 +23,7 @@ class CountsPettioner(threading.Thread):
 		self.database_adapter=database_adapter
 
 		self.sensors_manager=sensors_manager
+		self.dbUpConf=dbUpConf
 		
 	@staticmethod
 	def aux (array_to_json):
@@ -105,6 +108,10 @@ class CountsPettioner(threading.Thread):
 		sensors_data['temp_1'], sensors_data['temp_2']=self.sensors_manager.read_temp()
 		return sensors_data
 
+	def update_remote(self):
+		if self.dbUpConf!=None:
+			the_dbUpdater=dbUpdater(self.dbUpConf)
+			the_dbUpdater.start()
 
 	def run(self):
 		now_min=None
@@ -118,6 +125,7 @@ class CountsPettioner(threading.Thread):
 				if now_min+60 < now:   
 					data=self.request_get_Counts_EventsInfo(now_min)
 					self.save_data(now_min, data, sensors_data) 
+					self.update_remote()
 					sensors_data=self.read_sensors()
 					now_min=self.get_min(now)
 				else:
