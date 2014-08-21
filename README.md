@@ -75,4 +75,4 @@ nmpw
             root@beaglebone:~# pip install pyserial
         sqlite3
             root@beaglebone:~# pip install db-sqlite3
-
+	`#  TODO install MySQL-python

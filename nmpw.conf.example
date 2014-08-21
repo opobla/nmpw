@@ -18,6 +18,8 @@ db_updater_enabled=True
 local_db= /server/data/test.db 
 # The remote database config
 remote_db_host= localhost
+# The user must have privileges
 remote_db_user= hristo
 remote_db_pass= pass
-remote_db_db= nmpwdb
+# The database will be created if not exists along with all the tables
+remote_db_db= nmpwTEST
