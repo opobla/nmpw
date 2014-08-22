@@ -17,9 +17,9 @@ db_updater_enabled=True
 # Must be the same that Basic.database
 local_db= /server/data/test.db 
 # The remote database config
-remote_db_host= localhost
+remote_db_host= 192.168.1.1
 # The user must have privileges
 remote_db_user= hristo
-remote_db_pass= pass
+remote_db_pass= 123qwe
 # The database will be created if not exists along with all the tables
-remote_db_db= nmpwTEST
+remote_db_db= nmdadb2
