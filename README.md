@@ -47,11 +47,22 @@ nmpw
         	    [Install]
         	    WantedBy=multi-user.target
 
+        Edit/Create /lib/systemd/system/myWatchDog.service
+            Content should be:
+        	    [Unit]
+        	    Description=WatchDog
+
+        	    [Service]
+        	    ExecStart=/usr/bin/python /server/nmpw/watchDog.py
+
+        	    [Install]
+        	    WantedBy=multi-user.target
 
         Enable ntp services
             root@beaglebone:~# systemctl enable ntpdate.service
             root@beaglebone:~# systemctl enable ntpd.service
             root@beaglebone:~# systemctl enable nmpwDataAcquisition
+            root@beaglebone:~# systemctl enable myWatchDog
 
 	`#  TODO configure and enable systemctl service which starts the software which copies our database  
 
