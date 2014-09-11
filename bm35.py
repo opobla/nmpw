@@ -9,6 +9,7 @@ def bm35_compute_crc(command):
 	return command+`check_sum`
 
 def bm35_parse_pressure_answer(answer):
+	answer=answer[:-2]
 	re_answer=re.compile('^M[0-9][0-9]D[0-9][0-9].[0-9][0-9].[0-9][0-9][0-9][0-9],[0-9][0-9]:[0-9][0-9],[0-9]+,[0-9]+,[0-9][0-9][0-9][0-9]$')
 	if not(re_answer.match(answer)):
 		print "Invalid answer to parse"

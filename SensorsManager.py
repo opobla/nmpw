@@ -43,6 +43,9 @@ class SensorsManager:
 		if self.hvps_type=='analog':
 			analogHVPS.analogHVPS_init()
 
+		if self.bar_type=='bm35':
+			bm35.bm35_request_1min_reading_period(self.port_data)
+
 
 
 
