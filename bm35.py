@@ -11,9 +11,17 @@ def bm35_compute_crc(command):
 def bm35_parse_pressure_answer(answer):
 	re_answer=re.compile('^M[0-9][0-9]D[0-9][0-9].[0-9][0-9].[0-9][0-9][0-9][0-9],[0-9][0-9]:[0-9][0-9],[0-9]+,[0-9]+,[0-9][0-9][0-9][0-9]$')
 	if not(re_answer.match(answer)):
-		raise ValueError("Invalid answer to parse")
+		print "Invalid answer to parse"
+		return {'date':-1,
+			'meanPressure':-1,
+			'instantPressure':-1}
+		#raise ValueError("Invalid answer to parse")
 	if bm35_compute_crc(answer[:-3]) != answer:
-		raise ValueError("Answers crc is invalid")
+		print "Answers crc is invalid"
+		return {'date':-1,
+			'meanPressure':-1,
+			'instantPressure':-1}
+		#raise ValueError("Answers crc is invalid")
 
 	m=re.compile('[, || D || M || .]')
 	splited=m.split(answer)
