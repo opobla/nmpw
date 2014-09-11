@@ -55,7 +55,9 @@ class SensorsManager:
 			self.port_data.flush()
 			bm35.bm35_request_pressure_reading(self.port_data)
 			pressure_raw=self.port_data.readline()
+			print 'pressure_raw: ', pressure_raw
 			pressure=bm35.bm35_parse_pressure_answer(pressure_raw)
+			print 'pressure: ', pressure
 			return pressure['meanPressure']
 		if self.bar_type=='ap1':
 			pressure=ap1.ap1_read_pressure_using_strobe()

@@ -263,7 +263,7 @@ def init_resources(args):
 
 	# Initialize the Serial Port for the barometer if one is needed.
 	#  TODO Pass the sps baudrate as parameter or leave it as it is now
-	port_sensors=init_port(args.serial_port_sensors, args_baudrate=921600) #  TODO change the baudrate
+	port_sensors=init_port(args.serial_port_sensors, args_baudrate=9600) #  TODO change the baudrate
 
 	# Initialize the Database connection
 	conn=init_database(args.database)
