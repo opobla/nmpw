@@ -16,6 +16,7 @@ import sys
 from Reader import Reader
 from CountsPettioner import CountsPettioner
 from SensorsManager import SensorsManager
+from validate_arguments import validate_arguments
 
 def create_parser():
 	#Create the parser
@@ -328,6 +329,8 @@ if __name__=='__main__':
 	GPIO.output("P9_42", GPIO.HIGH)
 	
 	args=create_parser().parse_args()
+	validate_arguments(args)
+
 	port, port_sensors, conn = init_resources(args)
 
 	reader, counts= init_threads(port, args, port_sensors, conn)
