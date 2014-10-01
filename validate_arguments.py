@@ -1,3 +1,4 @@
+import logging
 def validate_arguments(args):
 	# Arguments always needed
 	if args.serial_port_control==None:
@@ -29,5 +30,6 @@ def validate_arguments(args):
 
 
 def end(error_msg):
-	pass
+	logging.info('Argument validator: '+error_msg)
+	logging.info('Exiting')
 	raise AttributeError(error_msg)
