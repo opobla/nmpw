@@ -318,8 +318,8 @@ def release_resources(port, port_sensors, conn):
 if __name__=='__main__':
 	# Init the loogger and log we are starting the program
 	logging.basicConfig(filename='/server/logs/nmpw.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
-	logging.info('.........................')
-	logging.info('.........................')
+	logging.info('                         ')
+	logging.info('                         ')
 	logging.info('Started')
 
 	# Init the P9_42. First we active the Reset signal for 0.5 secs

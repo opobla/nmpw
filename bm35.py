@@ -1,4 +1,5 @@
 import re
+import logging
 
 # Returns the command with correspondient check sum
 def bm35_compute_crc(command):
@@ -12,17 +13,15 @@ def bm35_parse_pressure_answer(answer):
 	answer=answer[:-2]
 	re_answer=re.compile('^M[0-9][0-9]D[0-9][0-9].[0-9][0-9].[0-9][0-9][0-9][0-9],[0-9][0-9]:[0-9][0-9],[0-9]+,[0-9]+,[0-9][0-9][0-9][0-9]$')
 	if not(re_answer.match(answer)):
-		print "Invalid answer to parse"
+		logging.info('Bm35: Invalid answer to parse. Bad format')
 		return {'date':-1,
 			'meanPressure':-1,
 			'instantPressure':-1}
-		#raise ValueError("Invalid answer to parse")
 	if bm35_compute_crc(answer[:-3]) != answer:
-		print "Answers crc is invalid"
+		logging.info('Bm35: Invalid answer to parse. Wrong CRC')
 		return {'date':-1,
 			'meanPressure':-1,
 			'instantPressure':-1}
-		#raise ValueError("Answers crc is invalid")
 
 	m=re.compile('[, || D || M || .]')
 	splited=m.split(answer)
@@ -35,13 +34,11 @@ def bm35_request_1min_reading_period(port):
 	command='A00I10'
 	full_command=bm35_compute_crc(command)
 	full_command +='\r\n'
-	#  TODO not sure......
 	port.write(full_command)
 
 def bm35_request_pressure_reading(port):
 	command='A00Q1'
 	full_command=bm35_compute_crc(command)
 	full_command +='\r\n'
-	#  TODO not sure......
 	port.write(full_command)
 
