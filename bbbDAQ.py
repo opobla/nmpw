@@ -52,6 +52,7 @@ def create_parser():
 	parser.add_argument('-sps', '--serial_port_sensors', help='The port the sensors will use to deliver their data')
 	parser.add_argument('-bm',  '--barometer_type', choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
 	parser.add_argument('-hv',  '--hvps_type', choices=['digital','analog'],help='Analog or Digital high voltage power suplly')
+	parser.add_argument('-ahvc','--analog_hvps_corr', type=float, help='Correction coefficient for the analog hvps')
 
 	parser.add_argument('-dbU', '--db_updater_enabled')
 	parser.add_argument('-ldb', '--local_db')
@@ -269,9 +270,12 @@ def init_resources(args):
 	# Initialize the Database connection
 	conn=init_database(args.database)
 
-	return port, port_sensors, conn
+	# Initialize the Sensors Manager
+	sensors_manager=SensorsManager('Sensor Manager', bar_type=args.barometer_type, hvps_type=args.hvps_type, port_control=port, port_data=port_sensors, analog_hvps_corr=args.analog_hvps_corr)
 
-def init_threads(port, args, port_sensors, conn):
+	return port, port_sensors, conn, sensors_manager
+
+def init_threads(port, args, port_sensors, conn, sensors_manager):
 	# Initialize all threads
 	end_condition=threading.Event()
 	end_condition.set()
@@ -282,7 +286,6 @@ def init_threads(port, args, port_sensors, conn):
 	shared_events_data=[]
 	shared_sensors_data=[]
 
-	sensors_manager=SensorsManager('Sensor Manager', bar_type=args.barometer_type, hvps_type=args.hvps_type, port_control=port, port_data=port_sensors)
 
 	dbUpConf=None
 	if args.db_updater_enabled==True:
@@ -331,9 +334,9 @@ if __name__=='__main__':
 	args=create_parser().parse_args()
 	validate_arguments(args)
 
-	port, port_sensors, conn = init_resources(args)
+	port, port_sensors, conn, sensors_manager= init_resources(args)
 
-	reader, counts= init_threads(port, args, port_sensors, conn)
+	reader, counts= init_threads(port, args, port_sensors, conn, sensors_manager)
 	start_threads(reader, counts)
 	
 	#For now this allows us to stop the threads relising the resources

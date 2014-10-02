@@ -11,6 +11,8 @@ serial_port_sensors= None
 barometer_type = None
 # The type of hvps that will be used. 'None', 'analog', 'digital'
 hvps_type = None
+#Correction coefficient for the analog hvps, 1.0 ==> No correction
+analog_hvps_corr = 1.0
 
 [dbUpdater]
 db_updater_enabled=True

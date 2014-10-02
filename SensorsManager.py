@@ -4,12 +4,13 @@ import analogHVPS
 import time
 
 class SensorsManager:
-	def __init__(self, name, bar_type=None, hvps_type=None, port_control=None, port_data=None):
+	def __init__(self, name, bar_type=None, hvps_type=None, port_control=None, port_data=None, analog_hvps_corr=None):
 		self.name=name
 		self.bar_type=bar_type
 		self.hvps_type=hvps_type
 		self.port_control=port_control
 		self.port_data=port_data
+		self.analog_hvps_corr=analog_hvps_corr
 		
 		self.validate_attributes()
 		self.init_resources()
@@ -92,7 +93,7 @@ class SensorsManager:
 			# We can only read three digital hvps, so we return a -1 for the fourth one.
 			return hvps1, hvps2, hvps3, -1
 		if self.hvps_type=='analog':
-			return analogHVPS.analogHVPS_read()
+			return analogHVPS.analogHVPS_read(self.analog_hvps_corr)
 
 
 	def read_temp(self):

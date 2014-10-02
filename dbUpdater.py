@@ -23,7 +23,6 @@ class dbUpdater(threading.Thread):
 		row = cur_rem.fetchone()
 		last_data_remote=row[0]
 
-		print last_data_remote
 		if last_data_remote==None:
 			last_data_remote='2000-01-01 00:00:00'
 		else:
