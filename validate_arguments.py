@@ -25,7 +25,7 @@ def validate_arguments(args):
 			end('If db_updater is enabled a remote_db_host must be set')
 		if args.remote_db_user==None or args.remote_db_pass==None:
 			end('A user and pass must be given for the remote database')
-		if args.remote_db_db
+		if args.remote_db_db==None:
 			end('The remote database name must be specified')
 
 
