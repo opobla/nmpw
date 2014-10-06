@@ -120,7 +120,7 @@ class SensorsManagerTestCase(unittest.TestCase):
 		port_control.write.return_value=True
 		port_data=MagicMock()
 		port_data.flush.return_value=True
-		port_data.readline.return_value='M99D17.07.2014,12:47,85661,11555,0768'
+		port_data.readline.return_value='M99D17.07.2014,12:47,85661,11555,0768\r\n'
 
 		SM_instance=SensorsManager.SensorsManager('The_name', 'bm35', None, port_control, port_data)
 		read_pressure=SM_instance.read_pressure()
