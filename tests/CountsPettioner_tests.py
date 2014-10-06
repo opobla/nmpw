@@ -36,7 +36,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 	def test_OutPut_save_BinTable(self):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
-		CP_instance=CP(None, None, None, None, None, database_adapter, None)
+		CP_instance=CP(None, None, None, None, None, database_adapter, None, None)
 		with capture(CP_instance.save_BinTable,1405516380.0, [23,12,45,23,12,67], [1,2]) as output:
 			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 Counts: [23, 12, 45, 23, 12, 67] Sensors: [1, 2]\n')		
 
@@ -47,7 +47,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database.commit.return_value=True
 
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
-		CP_instance=CP(None, None, None, None, None, database, None)
+		CP_instance=CP(None, None, None, None, None, database, None, None)
 		CP_instance.save_BinTable(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'hv4':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
 )
 
@@ -56,7 +56,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 	def test_OutPut_save_BinTableFromEvents(self):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
-		CP_instance=CP(None, None, None, None, None, database_adapter, None)
+		CP_instance=CP(None, None, None, None, None, database_adapter, None, None)
 		with capture(CP_instance.save_BinTableFromEvents,1405516380.0, [23,12,45,23,12,67], [1,2]) as output:
 			self.assertEqual(output,'start_date_time: 2014-07-16 15:13:00 CountsFromEvents: [23, 12, 45, 23, 12, 67] Sensors: [1, 2]\n')		
 
@@ -67,7 +67,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database.commit.return_value=True
 
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
-		CP_instance=CP(None, None, None, None, None, database, None)
+		CP_instance=CP(None, None, None, None, None, database, None, None)
 		CP_instance.save_BinTableFromEvents(1405516380.0,[4 for x in xrange(18)], {'hv1':-1,'hv2':-1,'hv3':-1,'hv4':-1,'temp_1':-1,'temp_2':-1,'atmPressure':-1}
 )
 
@@ -78,7 +78,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 	def test_OutPut_save_EventsInfo(self):
 		#Instance of a CountsPettioner where everythong is None.
 		database_adapter=None
-		CP_instance=CP(None, None, None, None, None, database_adapter, None)
+		CP_instance=CP(None, None, None, None, None, database_adapter, None, None)
 		with capture(CP_instance.save_EventsInfo,1405516380.0,[None,'To_print_histo','To_print_Low','To_print_Overflows']) as output:
 			self.assertEqual(output, '\nstart_date_time: 2014-07-16 15:04:00 \nhistograms: To_print_histo \nlowlevels: To_print_Low \noverflows: To_print_Overflows\n')
 		
@@ -89,13 +89,13 @@ class CountsPettionerTestCase(unittest.TestCase):
 		database.commit.return_value=True
 	
 		#Instance of a CountsPettioner where everythong is None except the database_adapter.
-		CP_instance=CP(None, None, None, None, None, database, None)
+		CP_instance=CP(None, None, None, None, None, database, None, None)
 		CP_instance.save_EventsInfo(1405516380.0,[None,[[4 for x in xrange(128)] for x in xrange(18)],[4 for x in xrange(18)],[0 for x in xrange(18)]])
 
 		database.assert_has_calls([call.execute(mock.ANY), call.commit()], any_order=False)
 
 	def test_Calls_save_data(self):
-		CP_instance=CP(None, None, None, None, None, None, None)
+		CP_instance=CP(None, None, None, None, None, None, None, None)
 		CP_instance.save_BinTable=MagicMock(return_value=True)
 		CP_instance.save_BinTableFromEvents=MagicMock(return_value=True)
 		CP_instance.save_EventsInfo=MagicMock(return_value=True)
@@ -125,7 +125,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		self.assertEqual(response,120.0)
 
 	def test_Constructor(self):
-		myCP=CP('Hi','There',{'some_numbers':[1,2,3,4,]},4,5,6, None)
+		myCP=CP('Hi','There',{'some_numbers':[1,2,3,4,]},4,5,6, None, None)
 		self.assertEqual(myCP.name,'CountsPettioner','CountsPettioner Constructor behaving incorrectly')
 		self.assertEqual(myCP.port,'Hi','CountsPettioner Constructor behaving incorrectly')
 		self.assertEqual(myCP.end_condition,'There','CountsPettioner Constructor behaving incorrectly')
@@ -144,7 +144,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		port=counts_condition
 		port.write.return_value=True
 		
-		CP_instance=CP(port, None, counts_condition, shared_counts_data, shared_events_data, None, None)
+		CP_instance=CP(port, None, counts_condition, shared_counts_data, shared_events_data, None, None, None)
 		CP_instance.copy_and_reset=MagicMock(return_value='Hi')
 
 		responce=CP_instance.request_get_Counts_EventsInfo(123.0)
@@ -177,7 +177,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		reload(CountsPettioner)  
 
 		# Create CountsPettioner and mock the methods called inside the run loop
-		CP_instance=CP(None, end_condition, None, None, None, None, None)
+		CP_instance=CP(None, end_condition, None, None, None, None, None, None)
 		aux=MagicMock()
 		aux.request_get_Counts_EventsInfo.return_value='Potato'
 		aux.save_data.return_value=True
@@ -212,14 +212,14 @@ class CountsPettionerTestCase(unittest.TestCase):
 		import CountsPettioner
 		reload(CountsPettioner)  
 
-		# Make the CpuntsPettioner use the mocked logging
+		# Make the CountsPettioner use the mocked logging
 		sys.modules['logging'] = logging
 		import CountsPettioner
 		reload(CountsPettioner)
 
 
 		# Create CountsPettioner and mock the methods called inside the run loop
-		CP_instance=CP(None, end_condition, None, None, None, None, None)
+		CP_instance=CP(None, end_condition, None, None, None, None, None, None)
 
 		aux=MagicMock()
 		aux.request_get_Counts_EventsInfo.return_value='Potato'
@@ -240,7 +240,7 @@ class CountsPettionerTestCase(unittest.TestCase):
 		sensors_manager.read_hvps.return_value=22, 33, 44 ,55
 		sensors_manager.read_temp.return_value=66, 77
 
-		CP_instance=CP(None, None, None, None, None, None, sensors_manager)
+		CP_instance=CP(None, None, None, None, None, None, sensors_manager, None)
 		returned_value=CP_instance.read_sensors()
 		
 		sensors_manager.read_pressure.assert_called_with()
@@ -250,6 +250,20 @@ class CountsPettionerTestCase(unittest.TestCase):
 		self.assertEqual(returned_value, {'atmPressure': 11, 'hv1':22, 'hv2':33, 'hv3':44, 'hv4':55, 'temp_1':66, 'temp_2':77})
 		
 		
+
+	def test_Calls_dbUpdater(self):
+		#Mock the dbUpdater
+		dbUpdater=MagicMock()
+		#dbUpdater.__init__.return_value=True
+		dbUpdater.start.return_value=True
+
+		# Make the CountsPettioner use the mocked dbUpdater
+		sys.modules['dbUpdater'] = dbUpdater
+		import CountsPettioner
+		reload(CountsPettioner)
+
+		CP_instance=CP(None, None, None, None, None, None, None, 'Something not None')
+		CP_instance.update_remote()
 
 
 

@@ -31,8 +31,8 @@ if __name__ == '__main__':
 	allTests=unittest.TestSuite()
 	allTests.addTests(bm35_suite())
 	allTests.addTests(CountsPettioner_suite())
-	allTests.addTests(Reader_suite())
-	allTests.addTests(SensorsManager_suite())
+#	allTests.addTests(Reader_suite())
+#	allTests.addTests(SensorsManager_suite())
 #	allTests.addTests(bbbDAQ_suite())
 	
 	unittest.TextTestRunner(verbosity=2).run(allTests)

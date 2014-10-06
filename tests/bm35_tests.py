@@ -16,16 +16,33 @@ class bm35TestCase(unittest.TestCase):
 		self.assertNotEqual(response,'aaa195')
 
 	def test_Equality_parse_pressure_answer(self):
-		response=bm35.bm35_parse_pressure_answer('M99D08.02.1999,11:40,96502,96555,0785')
+		response=bm35.bm35_parse_pressure_answer('M99D08.02.1999,11:40,96502,96555,0785\r\n')
 		self.assertEqual(response,{'date':'1999-02-08 11:40:00','meanPressure':96502,'instantPressure':96555})
 
-		response=bm35.bm35_parse_pressure_answer('M99D17.07.2014,12:47,85661,11555,0768')
+		response=bm35.bm35_parse_pressure_answer('M99D17.07.2014,12:47,85661,11555,0768\r\n')
 		self.assertEqual(response,{'date':'2014-07-17 12:47:00','meanPressure':85661,'instantPressure':11555})
 
 	def test_Errors_parse_pressure_answer(self):
-		self.assertRaisesRegexp(ValueError,'Invalid answer to parse', bm35.bm35_parse_pressure_answer, 'A incorrect string, just to test')
-		
-		self.assertRaisesRegexp(ValueError,'Answers crc is invalid', bm35.bm35_parse_pressure_answer, 'M99D17.07.2014,12:47,85661,11555,0444')
+		#Mock the logging
+		logging=MagicMock()
+		logging.info.return_value=True
+
+		# Make the CountsPettioner use the mocked logging
+		sys.modules['logging'] = logging
+		import bm35
+		reload(bm35)
+
+		response=bm35.bm35_parse_pressure_answer('M99D08.02.1999,11:40,96502,96555,0785')
+		self.assertEqual(response,{'date':-1,'meanPressure':-1,'instantPressure':-1})
+		logging.info.assert_called_with('Bm35: Invalid answer to parse. Bad format')
+
+		response=bm35.bm35_parse_pressure_answer('M99D17.07.2014,12:47,85661,11555,0111\r\n')
+		self.assertEqual(response,{'date':-1,'meanPressure':-1,'instantPressure':-1})
+		logging.info.assert_called_with('Bm35: Invalid answer to parse. Wrong CRC')
+
+
+		#self.assertRaisesRegexp(ValueError,'Invalid answer to parse', bm35.bm35_parse_pressure_answer, 'A incorrect string, just to test')
+		#self.assertRaisesRegexp(ValueError,'Answers crc is invalid', bm35.bm35_parse_pressure_answer, 'M99D17.07.2014,12:47,85661,11555,0444')
 
 
 	def test_Writting_request_pressure_reading(self):
