@@ -111,9 +111,30 @@ class dbUpdaterTestCase(unittest.TestCase):
 
 
 
-		#  TODO insert some more data into the local database, then call again the dbUpdater and finally chech.
+		# Repeat the same 3 steps again with some new data.
+		some_new_data=[]
+		some_new_data.append(( '2014-01-01 00:05:00', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1, 2, 3, 4, 1, 2, 999 ))
+		some_new_data.append(( '2014-01-01 00:06:00', 3, 3, 3, 3, 3, 3, 3, 3, 3, 33, 33, 33, 33, 33, 33, 33, 33, 33, 4, 4, 4, 4, 8, 8, 333 ))
+		some_new_data.append(( '2014-01-01 00:07:00', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1, 2, 3, 4, 1, 2, 999 ))
+		some_new_data.append(( '2014-01-01 00:08:00', 5, 5, 5, 5, 5, 5, 5, 5, 5, 55, 55, 55, 55, 55, 55, 55, 55, 55, 6, 6, 6, 6, 7, 7, 555 ))
+
+		conn.executemany("INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", some_new_data)
+		conn.commit()
+		some_data.extend(some_new_data)
 
 
+		the_dbUpdater=dbUpdater.dbUpdater(dbUpConf)
+		the_dbUpdater.start()
+		the_dbUpdater.join()
+
+
+		cur.execute("select * from binTable;")
+		count=0
+		for row in cur:
+			the_row=(str(row[0]), row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14],row[15],row[16],row[17],row[18],row[19],row[20],row[21],row[22],row[23],row[24],row[25])
+
+			self.assertEqual(the_row,some_data[count])
+			count+=1
 
 
 		# Finally drop the remote database
