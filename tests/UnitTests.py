@@ -10,6 +10,7 @@ from CountsPettioner_tests import CountsPettionerTestCase
 from Reader_tests import ReaderTestCase
 from SensorsManager_tests import SensorsManagerTestCase
 from dbUpdater_tests import dbUpdaterTestCase
+from validate_arguments_tests import validate_argumentsTestCase
 #from bbbDAQ_tests import bbbDAQTestCase
 
 def bm35_suite():
@@ -30,6 +31,9 @@ def dbUpdater_suite():
 def bbbDAQ_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(bbbDAQTestCase)
 
+def validate_arguments_suite():
+	return unittest.TestLoader().loadTestsFromTestCase(validate_argumentsTestCase)
+
 if __name__ == '__main__':
 	#  TODO add arguments wih argparse which will allow us to test different units.
 	allTests=unittest.TestSuite()
@@ -38,6 +42,7 @@ if __name__ == '__main__':
 	allTests.addTests(Reader_suite())
 	allTests.addTests(SensorsManager_suite())
 	allTests.addTests(dbUpdater_suite())
+	allTests.addTests(validate_arguments_suite())
 #	allTests.addTests(bbbDAQ_suite())
 	
 	unittest.TextTestRunner(verbosity=2).run(allTests)
