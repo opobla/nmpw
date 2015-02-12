@@ -87,3 +87,15 @@ nmpw
         sqlite3
             root@beaglebone:~# pip install db-sqlite3
 	`#  TODO install MySQL-python
+	
+**MicroSD**: Configuration a uSD needs.
+
+	The BeagleBone Black will look for the uEnv.txt file in the uSD. So we need to have one that looks like this.
+		mmcdev=1
+		bootpart=1:2
+		mmcroot=/dev/mmcblk1p2 ro
+		optargs=quiet drm.debug=7 capemgr.enable_partno=BB-UART2,BB-UART1 
+
+	The next thigh we must set up is the mount point for the uSD. Edit the file /etc/fstab adding the following line. Create the directory /media/microSD if not present.
+		/dev/mmcblk0p1       /media/microSD	  auto	     defaults		   0  0
+
