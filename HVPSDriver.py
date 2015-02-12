@@ -21,6 +21,4 @@ def analogHVPS_read(corr):
 	hvps4=((ADC.read("P9_38")*1800.0) /2.7*10.02) *corr
 	hvps4=((ADC.read("P9_38")*1800.0) /2.7*10.02) *corr
 	#  TODO Maybe convert the millivolts to something more meaningfull to us and return that value
-	return round(hvps1), round(hvps2), round(hvps3), round(hvps4)
-
-
+	return round(hvps1, 1), round(hvps2, 1), round(hvps3, 1), round(hvps4, 1)
