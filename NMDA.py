@@ -29,8 +29,8 @@ def create_parser():
 		defaults = dict(basics.items() + sensors.items() + dbUpdater.items())
 	
 	except:
-		print 'Probably the .nmpw.conf file is not configured. The nmpw.conf.example is an example file of how to config the .nmpw.conf file'
-		logging.info('Probably the .nmpw.conf file is not configured. The nmpw.conf.example is an example file of how to config the .nmpw.conf file')
+		print 'Probably the .NMDA.conf file is not configured. The NMDA.conf.example is an example file of how to config the .NMDA.conf file'
+		logging.info('Probably the .NMDA.conf file is not configured. The NMDA.conf.example is an example file of how to config the .NMDA.conf file')
 		print 'Exiting'
 		logging.info('Exiting')
 		sys.exit(0)
@@ -332,7 +332,7 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 			print 'Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.'
 			logging.info('Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.')
 	
-	reader=FPGASerialManager(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
+	reader=FPGASerialReader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
 	counts=CountsManager(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager, dbUpConf)
 	
 	return reader, counts

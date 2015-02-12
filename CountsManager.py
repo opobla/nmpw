@@ -9,10 +9,10 @@ import logging
 
 from DBUpdater import DBUpdater
 
-class CountsPettioner(threading.Thread):
+class CountsManager(threading.Thread):
 	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter, sensors_manager, dbUpConf):
 		threading.Thread.__init__(self)
-		self.name='CountsPettioner'
+		self.name='CountsManager'
 		self.port=port
 		self.end_condition=end_condition
 		self.counts_condition=counts_condition
@@ -34,9 +34,9 @@ class CountsPettioner(threading.Thread):
 	def copy_and_reset(data, bool_all):
 		events_data=copy.deepcopy(data)
 		if bool_all:
-			CountsPettioner.reset_to_0(data)
+			CountsManager.reset_to_0(data)
 		else:
-			CountsPettioner.reset_to_0(data[0]) #  TODO change to data['CountsFromEvents']
+			CountsManager.reset_to_0(data[0]) #  TODO change to data['CountsFromEvents']
 		return events_data
 
 	
@@ -44,7 +44,7 @@ class CountsPettioner(threading.Thread):
 	def reset_to_0(the_array):
     		for i, e in enumerate(the_array):
         		if isinstance(e, list):
-            			CountsPettioner.reset_to_0(e)
+            			CountsManager.reset_to_0(e)
         		else:
             			the_array[i] = 0
 			
