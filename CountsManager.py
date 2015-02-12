@@ -4,11 +4,10 @@ from time import strftime
 from threading import Thread
 import datetime
 import json
-#import sqlite3
 import copy
 import logging
 
-from dbUpdater import dbUpdater
+from DBUpdater import DBUpdater
 
 class CountsPettioner(threading.Thread):
 	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter, sensors_manager, dbUpConf):
@@ -110,7 +109,7 @@ class CountsPettioner(threading.Thread):
 
 	def update_remote(self):
 		if self.dbUpConf!=None:
-			the_dbUpdater=dbUpdater(self.dbUpConf)
+			the_dbUpdater=DBUpdater(self.dbUpConf)
 			the_dbUpdater.start()
 
 	def run(self):

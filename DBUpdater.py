@@ -3,7 +3,7 @@ import MySQLdb
 import threading
 from threading import Thread
 
-class dbUpdater(threading.Thread):
+class DBUpdater(threading.Thread):
 	def __init__(self, dbUpConf):
 		threading.Thread.__init__(self)
 		self.name='dbUpdater'

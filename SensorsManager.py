@@ -1,6 +1,6 @@
-import ap1
-import bm35
-import analogHVPS
+import AP1Driver
+import BM35Driver
+import HVPSDriver
 import time
 
 class SensorsManager:

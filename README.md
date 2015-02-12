@@ -15,9 +15,9 @@ nmpw
 
 
         Configure the config file.
-            Edit/Create /server/nmpw/.nmpw.conf
+            Edit/Create /server/nmpw/.NMDA.conf
             Or you can copy the exmaple file:
-                cp /server/nmpw/nmpw.conf.exmaple /server/nmpw/.nmpw.conf
+                cp /server/nmpw/NMDA.conf.exmaple /server/nmpw/.NMDA.conf
 
 
         Install ntp if not installed
@@ -42,7 +42,7 @@ nmpw
         	    After=ntpdate.service
 
         	    [Service]
-        	    ExecStart=/usr/bin/python /server/nmpw/bbbDAQ.py
+        	    ExecStart=/usr/bin/python /server/nmpw/NMDA.py
 
         	    [Install]
         	    WantedBy=multi-user.target
@@ -53,7 +53,7 @@ nmpw
         	    Description=WatchDog
 
         	    [Service]
-        	    ExecStart=/usr/bin/python /server/nmpw/watchDog.py
+        	    ExecStart=/usr/bin/python /server/nmpw/WatchDog.py
 
         	    [Install]
         	    WantedBy=multi-user.target

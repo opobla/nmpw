@@ -7,23 +7,22 @@ import threading
 from time import strftime
 from datetime import datetime
 import serial
-#import pymongo
 import sqlite3
 import MySQLdb
 import signal
 import sys
 
-from Reader import Reader
-from CountsPettioner import CountsPettioner
+from FPGASerialReader import FPGASerialReader
+from CountsManager import CountsManager
 from SensorsManager import SensorsManager
-from validate_arguments import validate_arguments
+#from validate_arguments import validate_arguments
 
 def create_parser():
 	#Create the parser
 
 	config = ConfigParser.SafeConfigParser()
 	try:
-    		config.read(['/server/nmpw/.nmpw.conf'])
+    		config.read(['/server/nmpw/.NMDA.conf'])
     		basics = dict(config.items("Basics"))
 		sensors = dict(config.items("Sensors"))
 		dbUpdater = dict(config.items("dbUpdater"))
@@ -62,6 +61,42 @@ def create_parser():
 	parser.add_argument('-rdb', '--remote_db_db')
 
 	return parser
+
+def validate_arguments(args):
+	# Arguments always needed
+	if args.serial_port_control==None:
+		end('A control serial port is needed')
+	if args.database==None:
+		end('A database is needed')
+
+	# Valid bar_type 
+	if not(args.barometer_type==None or args.barometer_type=='ap1' or args.barometer_type=='bm35'):
+		end('Invalid barometer type')
+
+	# Valid hvps_type
+	if not(args.hvps_type==None or args.hvps_type=='digital' or args.hvps_type=='analog'):
+		end('Invalid hvps_type')
+
+	# The needed port are present
+	if (args.hvps_type=='digital' or args.barometer_type=='bm35') and (args.serial_port_control==None or args.serial_port_sensors==None):
+		end('In order to read data from a digital hvps we need two ports, one for control and one for data')
+
+	if args.db_updater_enabled==True:
+		if args.local_db==None or args.local_db!=args.database:
+			end('Incorrect local_db')
+		if args.remote_db_host==None:
+			end('If db_updater is enabled a remote_db_host must be set')
+		if args.remote_db_user==None or args.remote_db_pass==None:
+			end('A user and pass must be given for the remote database')
+		if args.remote_db_db==None:
+			end('The remote database name must be specified')
+
+def end(error_msg):
+	logging.info('Argument validator: '+error_msg)
+	logging.info('Exiting')
+	raise AttributeError(error_msg)
+
+
 
 
 def init_port(args_port, args_baudrate):
@@ -297,8 +332,8 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 			print 'Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.'
 			logging.info('Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.')
 	
-	reader=Reader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
-	counts=CountsPettioner(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager, dbUpConf)
+	reader=FPGASerialManager(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
+	counts=CountsManager(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager, dbUpConf)
 	
 	return reader, counts
 	
@@ -320,7 +355,7 @@ def release_resources(port, port_sensors, conn):
 
 if __name__=='__main__':
 	# Init the loogger and log we are starting the program
-	logging.basicConfig(filename='/server/logs/nmpw.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
+	logging.basicConfig(filename='/server/logs/NMDA.log', level=logging.DEBUG, format="%(asctime)s   %(message)s")
 	logging.info('                         ')
 	logging.info('                         ')
 	logging.info('Started')

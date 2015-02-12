@@ -5,7 +5,7 @@ import datetime
 import operator
 import logging
 
-class Reader(threading.Thread):
+class FPGASerialReader(threading.Thread):
 	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data):
 		threading.Thread.__init__(self)
 		self.name='Reader'
