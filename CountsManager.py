@@ -10,14 +10,15 @@ import logging
 from DBUpdater import DBUpdater
 
 class CountsManager(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data, database_adapter, sensors_manager, dbUpConf):
+	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_events, database_adapter, sensors_manager, dbUpConf):
 		threading.Thread.__init__(self)
 		self.name='CountsManager'
 		self.port=port
 		self.end_condition=end_condition
 		self.counts_condition=counts_condition
-		self.shared_counts_data=shared_counts_data
-		self.shared_events_data=shared_events_data
+		self.shared_counts=shared_counts
+		self.shared_countsFromEevents=shared_countsFromEvents
+		self.shared_events=shared_events
 	
 		self.database_adapter=database_adapter
 
@@ -31,13 +32,10 @@ class CountsManager(threading.Thread):
 
 	#return a copy of the argument and resets he argument
 	@staticmethod
-	def copy_and_reset(data, bool_all):
-		events_data=copy.deepcopy(data)
-		if bool_all:
-			CountsManager.reset_to_0(data)
-		else:
-			CountsManager.reset_to_0(data[0]) #  TODO change to data['CountsFromEvents']
-		return events_data
+	def copy_and_reset(data):
+		the_copy=copy.deepcopy(data)
+		CountsManager.reset_to_0(data)
+		return the_copy
 
 	
 	@staticmethod
@@ -49,7 +47,8 @@ class CountsManager(threading.Thread):
             			the_array[i] = 0
 			
 
-	def save_BinTable(self, now_min, binTable, sensors):
+	def save_counts(self, now_min, counts, sensors):
+		# TODO you left it here......
 		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
 			print 'start_date_time:', time_entry, 'Counts:', binTable, 'Sensors:', sensors
@@ -78,11 +77,11 @@ class CountsManager(threading.Thread):
 			self.database_adapter.execute(sql)
 			self.database_adapter.commit()
 
-	def save_data(self, now_min, data, sensors_data):
-		self.save_BinTable(now_min,data['Counts'],sensors_data)
-		self.save_BinTableFromEvents(now_min,data['EventsInfo'][0],sensors_data)
+	def save_data(self, now_min, counts, countsFromEvents, events, sensors_data):
+		self.save_counts(now_min, counts, sensors_data)
+		self.save_countsFromEvents(now_min, countsFromEvents, sensors_data)
 		if now_min%600==540:
-			self.save_EventsInfo(now_min,data['EventsInfo'])
+			self.save_events(now_min, events)
 
 
 	@staticmethod
@@ -93,12 +92,14 @@ class CountsManager(threading.Thread):
 	def request_get_Counts_EventsInfo(self,now_min):
 		#Ask the FPGA for the counts data
 		self.port.write('\x11') #0x11
-		events_data=self.copy_and_reset(self.shared_events_data, now_min%600==540)
+		countsFromEvents=self.copy_and_reset(self.countsFromEvents)
+		events = []
+		if now_min%600==540:
+			events=self.copy_and_reset(self.shared_events)
 		self.counts_condition.acquire()
-
 		#  TODO make a method that copy the shared data and test it. The slice trick is weird..
-		binTable=self.shared_counts_data[:]	
-		return {'Counts':binTable,'EventsInfo':events_data}
+		counts=self.shared_counts[:]	
+		return counts, countsFromEvents, events
 
 	def read_sensors(self):
 		sensors_data={}
@@ -128,8 +129,9 @@ class CountsManager(threading.Thread):
 
 			else:
 				if now_min+60 < now:   
-					data=self.request_get_Counts_EventsInfo(now_min)
-					self.save_data(now_min, data, sensors_data) 
+					counts, countsFromEvents, events=self.request_get_Counts_EventsInfo(now_min)
+					self.save_data(now_min, counts, countsFromEvents, events, sensors_data) 
+
 					self.update_remote()
 					sensors_data=self.read_sensors()
 					now_min=self.get_min(now)

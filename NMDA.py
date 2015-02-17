@@ -329,10 +329,9 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 
 	counts_condition=threading.Lock()
 	counts_condition.acquire()
-	shared_counts_data=[]
-	shared_events_data=[]
-	shared_sensors_data=[]
-
+	shared_counts		=[]
+	shared_countsFromEvents	=[]
+	shared_events		=[]
 
 	dbUpConf=None
 	if args.db_updater_enabled==True:
@@ -344,8 +343,8 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 			print 'Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.'
 			logging.info('Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.')
 	
-	reader=FPGASerialReader(port, end_condition, counts_condition, shared_counts_data, shared_events_data)
-	counts=CountsManager(port,end_condition, counts_condition, shared_counts_data, shared_events_data, conn, sensors_manager, dbUpConf)
+	reader=FPGASerialReader(port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events)
+	counts=CountsManager(port,end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf)
 	
 	return reader, counts
 	

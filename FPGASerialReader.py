@@ -6,14 +6,15 @@ import operator
 import logging
 
 class FPGASerialReader(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts_data, shared_events_data):
+	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countFromEvents, shared_events):
 		threading.Thread.__init__(self)
 		self.name='Reader'
 		self.port=port
 		self.end_condition=end_condition
 		self.counts_condition=counts_condition
-		self.shared_counts_data=shared_counts_data
-		self.shared_events_data=shared_events_data
+		self.shared_counts=shared_counts
+		self.shared_countsFromEvents=shared_countsFromEevents
+		self.shared_events=shared_events
 
 		self.status='bytex'
 		self.histo_data=[[0 for x in xrange(128)] for x in xrange(18)]
@@ -21,8 +22,9 @@ class FPGASerialReader(threading.Thread):
 		self.low_events=[0 for x in xrange(18)]
 		self.overflows=[0 for x in xrange(18)]
 
-		self.shared_counts_data[:]=[0 for x in xrange(18)]
-		self.shared_events_data[:]=[[0 for x in xrange(18)],[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
+		self.shared_counts[:]			=[0 for x in xrange(18)]
+		self.shared_countsFromEevents[:]	=[0 for x in xrange(18)]
+		self.shared_events[:]			=[[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
 
 		self.channel_counts=None
 
@@ -59,7 +61,7 @@ class FPGASerialReader(threading.Thread):
 			overflow_almost_full=(ord(next[0]) & 0b01000000) >> 6
 
 			print 'Overflow: ',self.overflow
-			self.shared_events_data[3][:]=map(operator.add, self.shared_events_data[3],self.overflow)
+			self.shared_events[2][:]=map(operator.add, self.shared_events[3],self.overflow)
 			#  TODO Decide what to do with the overflow_general and almost_full data...
 			return
 	
@@ -84,11 +86,10 @@ class FPGASerialReader(threading.Thread):
 			pulse_width_ticks=self.count06 + (self.count711 << 7)
 
 			if self.pulse_type==0:
-				self.shared_events_data[2][self.channel] +=1
+				self.shared_events[1][self.channel] +=1
 			if self.pulse_type==1:
-				self.shared_events_data[1][self.channel][pulse_width_ticks>>5] +=1
-				self.shared_events_data[0][self.channel] +=1
-			
+				self.shared_events[0][self.channel][pulse_width_ticks>>5] +=1
+				self.shared_countFromEvents[self.channel] +=1
 
 			#print datetime.datetime.now().time(),"Ch:",self.channel,"Pulse type:",self.pulse_type," Pulse width:",pulse_width_ticks,\
 			#	float(pulse_width_ticks) / 50.0,"useg"
@@ -121,7 +122,7 @@ class FPGASerialReader(threading.Thread):
 			self.counts_val=self.counts_val+((ord(next[0]) & 0b00000011) << 14)
 			self.counts_values[self.channel_counts]=self.counts_val
 			if self.channel_counts==17:
-				self.shared_counts_data[:]=self.counts_values[:]
+				self.shared_counts[:]=self.counts_values[:]
 				self.counts_condition.release()
 
 				self.channel_counts=None
