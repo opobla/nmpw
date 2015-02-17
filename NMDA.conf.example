@@ -3,6 +3,8 @@
 serial_port_control  = /dev/ttyO2
 # The local database where data will be saved. If 'shell' is specified as database data will be printed to the shell
 database = /server/data/test.db
+# Channel averages used for the median algorithm...
+Channel_avg = 255, 290, 0, 295, 0, 0, 289, 291, 252, 254, 293, 299, 298, 328, 299, 302, 302, 272
 
 [Sensors]
 # The serial RS232_FPGA1

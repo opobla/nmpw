@@ -43,6 +43,8 @@ def create_parser():
 			defaults[key]=True
 		if defaults[key]=='False':
 			defaults[key]=False
+		if key == 'channel_avg':
+			defaults[key]=[int(i) for i in defaults[key].split(',')]
 
 	parser = argparse.ArgumentParser(description="Launch the python module for the new pulse width core for the neutron monitors.")
 	parser.set_defaults(**defaults)
@@ -194,6 +196,16 @@ def init_database(args_database):
 					'ch18Histo' TEXT DEFAULT NULL,\
 					PRIMARY KEY ('start_date_time')\
 		)")
+
+		conn.execute("CREATE TABLE IF NOT EXISTS 'CALM_ori'(\
+					'start_date_time' datetime NOT NULL,\
+					'length_time_interval_s' int(5) NOT NULL,\
+					'measured_uncorrected' float unsigned DEFAULT NULL,\
+					'measured_corr_for_efficiency' float unsigned DEFAULT NULL,\
+					'measured_corr_for_pressure' float unsigned DEFAULT NULL,\
+					'measured_pressure_mbar' float DEFAULT NULL,\
+					PRIMARY KEY ('start_date_time')\
+		)'")
 	# Finaly return the database connection
 	return conn
 

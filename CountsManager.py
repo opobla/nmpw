@@ -112,6 +112,12 @@ class CountsManager(threading.Thread):
 			the_dbUpdater=DBUpdater(self.dbUpConf)
 			the_dbUpdater.start()
 
+	def calc_globals(counts, sensors_data):
+		uncorrected   	= self.medianAlgorithm(counts)
+		corr_pressure 	= uncorrected
+		corr_efficiency	= uncorrected
+		return {'uncorrected':uncorrected, 'corr_pressure':corr_pressure, 'corr_efficiency':corr_efficiency}
+
 	def run(self):
 		now_min=None
 		while self.end_condition.is_set():
