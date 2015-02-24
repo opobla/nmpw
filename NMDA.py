@@ -344,7 +344,7 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 			logging.info('Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.')
 	
 	reader=FPGASerialReader(port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events)
-	counts=CountsManager(port,end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf)
+	counts=CountsManager(port,end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf, args.channel_avg)
 	
 	return reader, counts
 	

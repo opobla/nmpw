@@ -6,24 +6,24 @@ import datetime
 import json
 import copy
 import logging
+import numpy
 
 from DBUpdater import DBUpdater
 
 class CountsManager(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf):
+	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf, channel_avg):
 		threading.Thread.__init__(self)
-		self.name='CountsManager'
-		self.port=port
-		self.end_condition=end_condition
-		self.counts_condition=counts_condition
-		self.shared_counts=shared_counts
-		self.shared_countsFromEvents=shared_countsFromEvents
-		self.shared_events=shared_events
-	
-		self.database_adapter=database_adapter
-
-		self.sensors_manager=sensors_manager
-		self.dbUpConf=dbUpConf
+		self.name			='CountsManager'
+		self.port			=port
+		self.end_condition		=end_condition
+		self.counts_condition		=counts_condition
+		self.shared_counts		=shared_counts
+		self.shared_countsFromEvents	=shared_countsFromEvents
+		self.shared_events		=shared_events
+		self.database_adapter		=database_adapter
+		self.sensors_manager		=sensors_manager
+		self.dbUpConf			=dbUpConf
+		self.channel_avg		=channel_avg
 		
 	@staticmethod
 	def aux (array_to_json):
@@ -53,7 +53,6 @@ class CountsManager(threading.Thread):
 		if self.database_adapter==None:
 			print 'start_date_time:', time_entry, 'Counts:', binTable, 'Sensors:', sensors
 		else:
-			#sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTable[0]`+", "+`binTable[1]`+", "+`binTable[2]`+", "+`binTable[3]`+", "+`binTable[4]`+", "+`binTable[5]`+", "+`binTable[6]`+", "+`binTable[7]`+", "+`binTable[8]`+", "+`binTable[9]`+", "+`binTable[10]`+", "+`binTable[11]`+", "+`binTable[12]`+", "+`binTable[13]`+", "+`binTable[14]`+", "+`binTable[15]`+", "+`binTable[16]`+", "+`binTable[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['hv4']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
 			sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 			self.database_adapter.execute(sql, [time_entry]+ counts +[sensors['hv1'], sensors['hv2'], sensors['hv3'], sensors['hv4'], sensors['temp_1'], sensors['temp_2'], sensors['atmPressure']])
 			self.database_adapter.commit()
@@ -64,7 +63,6 @@ class CountsManager(threading.Thread):
 		if self.database_adapter==None:
 			print 'start_date_time:', time_entry, 'CountsFromEvents:', binTableFromEvents, 'Sensors:', sensors
 		else:
-			#sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values ('"+time_entry+"', "+`binTableFromEvents[0]`+", "+`binTableFromEvents[1]`+", "+`binTableFromEvents[2]`+", "+`binTableFromEvents[3]`+", "+`binTableFromEvents[4]`+", "+`binTableFromEvents[5]`+", "+`binTableFromEvents[6]`+", "+`binTableFromEvents[7]`+", "+`binTableFromEvents[8]`+", "+`binTableFromEvents[9]`+", "+`binTableFromEvents[10]`+", "+`binTableFromEvents[11]`+", "+`binTableFromEvents[12]`+", "+`binTableFromEvents[13]`+", "+`binTableFromEvents[14]`+", "+`binTableFromEvents[15]`+", "+`binTableFromEvents[16]`+", "+`binTableFromEvents[17]`+", "+`sensors['hv1']`+", "+`sensors['hv2']`+", "+`sensors['hv3']`+", "+`sensors['hv4']`+", "+`sensors['temp_1']`+", "+`sensors['temp_2']`+", "+`sensors['atmPressure']`+")"
 			sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 			self.database_adapter.execute(sql, [time_entry]+ countsFromEvents +[sensors['hv1'], sensors['hv2'], sensors['hv3'], sensors['hv4'], sensors['temp_1'], sensors['temp_2'], sensors['atmPressure']])
 			self.database_adapter.commit()
@@ -75,25 +73,26 @@ class CountsManager(threading.Thread):
 		if self.database_adapter==None:
 			print '\nstart_date_time:',time_entry,'\nhistograms:',events_data[1],'\nlowlevels:',events_data[2],'\noverflows:',events_data[3]
 		else:
-			#sql="insert into EventsInfo10Mins (start_date_time, overflows, lowLevels, ch01Histo, ch02Histo, ch03Histo, ch04Histo, ch05Histo, ch06Histo, ch07Histo, ch08Histo, ch09Histo, ch10Histo, ch11Histo, ch12Histo, ch13Histo, ch14Histo, ch15Histo, ch16Histo, ch17Histo, ch18Histo) values ('"+time_entry+"', '"+self.aux(events_data[3])+"', '"+self.aux(events_data[2])+"', '"+self.aux(events_data[1][0])+"', '"+self.aux(events_data[1][1])+"', '"+self.aux(events_data[1][2])+"', '"+self.aux(events_data[1][3])+"', '"+self.aux(events_data[1][4])+"', '"+self.aux(events_data[1][5])+"', '"+self.aux(events_data[1][6])+"', '"+self.aux(events_data[1][7])+"', '"+self.aux(events_data[1][8])+"', '"+self.aux(events_data[1][9])+"', '"+self.aux(events_data[1][10])+"', '"+self.aux(events_data[1][11])+"', '"+self.aux(events_data[1][12])+"', '"+self.aux(events_data[1][13])+"', '"+self.aux(events_data[1][14])+"', '"+self.aux(events_data[1][15])+"', '"+self.aux(events_data[1][16])+"', '"+self.aux(events_data[1][17])+"')"
 			sql="insert into EventsInfo10Mins (start_date_time, overflows, lowLevels, ch01Histo, ch02Histo, ch03Histo, ch04Histo, ch05Histo, ch06Histo, ch07Histo, ch08Histo, ch09Histo, ch10Histo, ch11Histo, ch12Histo, ch13Histo, ch14Histo, ch15Histo, ch16Histo, ch17Histo, ch18Histo) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 			self.database_adapter.execute(sql, [time_entry, self.aux(events[2]), self.aux(events[1])] + [self.aux(x) for x in events[0]])
 			self.database_adapter.commit()
 
-	def save_data(self, now_min, counts, countsFromEvents, events, sensors_data):
-		self.save_counts(now_min, counts, sensors_data)
-		self.save_countsFromEvents(now_min, countsFromEvents, sensors_data)
-		if now_min%600==540:
-			print "Go check yo self..."
-			self.save_events(now_min, events)
 
+	def save_globals(self, now_min, uncorrected, corr_pressure, corr_efficiency, sensors):
+		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
+		if self.database_adapter==None:
+			print '\nstart_date_time:',time_entry,'\nuncorrected', uncorrected,'\ncorr_pressure:',corr_pressure,'\ncorr_efficiency:',corr_efficiency
+		else:
+			sql="insert into CALM_ori (start_date_time, length_time_interval_s, measured_uncorrected, measured_corr_for_efficiency, measured_corr_for_pressure, measured_pressure_mbar) values (?, ?, ?, ?, ?, ?)"
+			self.database_adapter.execute(sql, [time_entry, 60, uncorrected, corr_efficiency, corr_pressure, sensors['atmPressure']])
+			self.database_adapter.commit()
 
 	@staticmethod
 	def get_min(the_time):
 		return the_time-the_time%60
 
 
-	def request_get_Counts_EventsInfo(self,now_min):
+	def getData(self,now_min):
 		#Ask the FPGA for the counts data
 		self.port.write('\x11') #0x11
 		countsFromEvents=self.copy_and_reset(self.shared_countsFromEvents)
@@ -117,11 +116,20 @@ class CountsManager(threading.Thread):
 			the_dbUpdater=DBUpdater(self.dbUpConf)
 			the_dbUpdater.start()
 
-	def calc_globals(counts, sensors_data):
-		uncorrected   	= self.medianAlgorithm(counts)
-		corr_pressure 	= uncorrected
-		corr_efficiency	= uncorrected
-		return {'uncorrected':uncorrected, 'corr_pressure':corr_pressure, 'corr_efficiency':corr_efficiency}
+	def calc_globals(self, counts, sensors_data):
+		uncorrected_min   	= self.medianAlgorithm(counts)
+		uncorrected_sec  	= uncorrected_min/60.0
+		corr_pressure_sec 	= uncorrected_sec
+		corr_efficiency_sec	= uncorrected_sec
+		return uncorrected_sec, corr_pressure_sec, corr_efficiency_sec
+
+	def medianAlgorithm(self, counts):
+		r= [float(x)/float(z) for x,z in zip (counts, self.channel_avg) 
+				if z>0 and (float(x)/float(z))>0.3 and (float(x)/float(z))< 10] 
+		tet = numpy.median(r)
+		s0 = sum(self.channel_avg)
+		summa = s0*tet
+		return summa
 
 	def run(self):
 		now_min=None
@@ -133,8 +141,14 @@ class CountsManager(threading.Thread):
 
 			else:
 				if now_min+60 < now:   
-					counts, countsFromEvents, events=self.request_get_Counts_EventsInfo(now_min)
-					self.save_data(now_min, counts, countsFromEvents, events, sensors_data) 
+					counts, countsFromEvents, events		=self.getData(now_min)
+					uncorrected, corr_pressure, corr_efficiency 	=self.calc_globals(counts, sensors_data)
+
+					self.save_counts(now_min, counts, sensors_data)
+					self.save_countsFromEvents(now_min, countsFromEvents, sensors_data)
+					if now_min%600==540:
+						self.save_events(now_min, events)
+					self.save_globals(now_min, uncorrected, corr_pressure, corr_efficiency, sensors_data)
 
 					self.update_remote()
 					sensors_data=self.read_sensors()
