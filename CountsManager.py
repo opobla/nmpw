@@ -121,15 +121,7 @@ class CountsManager(threading.Thread):
 	def calc_globals(self, counts, sensors_data):
 		uncorrected_min   	= self.medianAlgorithm(counts)
 		uncorrected_sec  	= uncorrected_min/60.0
-		conn_remote = MySQLdb.connect(	host= 	self.dbUpConf['remote']['host'], # your host, usually localhost
-				 		user= 	self.dbUpConf['remote']['user'], # your username
-						passwd= self.dbUpConf['remote']['pass'], # your password
-						db= 	'nmdadb') # name of the data base
-		remote_cursor 	= conn_remote.cursor()
-		remote_cursor.execute("SELECT atmPressure FROM binTable ORDER BY start_date_time DESC LIMIT 1")
-		last_data	= remote_cursor.fetchone()[0]
-		corr_pressure_sec 	= uncorrected_sec * self.pressureConf['average'] / (last_data/100) 
-		print corr_pressure_sec
+		corr_pressure_sec 	= uncorrected_sec * self.pressureConf['average'] / (sensors_data['atmPressure']/100) 
 		corr_efficiency_sec	= uncorrected_sec
 		return uncorrected_sec, corr_pressure_sec, corr_efficiency_sec
 
@@ -162,6 +154,15 @@ class CountsManager(threading.Thread):
 
 					self.update_remote()
 					sensors_data=self.read_sensors()
+					## TODO Remove. The workaround of not having a barometer
+					conn_remote = MySQLdb.connect(	host	= self.dbUpConf['remote']['host'], # your host, usually localhost
+				 					user	= self.dbUpConf['remote']['user'], # your username
+									passwd	= self.dbUpConf['remote']['pass'], # your password
+									db	= 'nmdadb') # name of the data base
+					remote_cursor = conn_remote.cursor()
+					remote_cursor.execute("SELECT atmPressure FROM binTable ORDER BY start_date_time DESC LIMIT 1")
+					sensors_data['atmPressure'] = remote_cursor.fetchone()[0]
+					## TODO Remove. The workaround of not having a barometer
 					now_min=self.get_min(now)
 				else:
 					logging.info(self.name+': The thread have woken up earlier')
