@@ -7,11 +7,12 @@ import json
 import copy
 import logging
 import numpy
+import MySQLdb
 
 from DBUpdater import DBUpdater
 
 class CountsManager(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf, channel_avg):
+	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf, channel_avg, pressureConf):
 		threading.Thread.__init__(self)
 		self.name			='CountsManager'
 		self.port			=port
@@ -24,6 +25,7 @@ class CountsManager(threading.Thread):
 		self.sensors_manager		=sensors_manager
 		self.dbUpConf			=dbUpConf
 		self.channel_avg		=channel_avg
+		self.pressureConf		=pressureConf
 		
 	@staticmethod
 	def aux (array_to_json):
@@ -119,7 +121,15 @@ class CountsManager(threading.Thread):
 	def calc_globals(self, counts, sensors_data):
 		uncorrected_min   	= self.medianAlgorithm(counts)
 		uncorrected_sec  	= uncorrected_min/60.0
-		corr_pressure_sec 	= uncorrected_sec
+		conn_remote = MySQLdb.connect(	host= 	self.dbUpConf['remote']['host'], # your host, usually localhost
+				 		user= 	self.dbUpConf['remote']['user'], # your username
+						passwd= self.dbUpConf['remote']['pass'], # your password
+						db= 	'nmdadb') # name of the data base
+		remote_cursor 	= conn_remote.cursor()
+		remote_cursor.execute("SELECT atmPressure FROM binTable ORDER BY start_date_time DESC LIMIT 1")
+		last_data	= remote_cursor.fetchone()[0]
+		corr_pressure_sec 	= uncorrected_sec * self.pressureConf['average'] / (last_data/100) 
+		print corr_pressure_sec
 		corr_efficiency_sec	= uncorrected_sec
 		return uncorrected_sec, corr_pressure_sec, corr_efficiency_sec
 

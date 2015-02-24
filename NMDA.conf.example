@@ -27,3 +27,8 @@ remote_db_user= hristo
 remote_db_pass= 123qwe
 # The database will be created if not exists along with all the tables
 remote_db_db= nmdadb2
+
+[Pressure]
+# Average pressure for the station.
+avg_pressure=950
+beta_pressure=0.006

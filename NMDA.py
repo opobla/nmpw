@@ -23,10 +23,11 @@ def create_parser():
 	config = ConfigParser.SafeConfigParser()
 	try:
     		config.read(['.NMDA.conf'])
-    		basics = dict(config.items("Basics"))
-		sensors = dict(config.items("Sensors"))
-		dbUpdater = dict(config.items("dbUpdater"))
-		defaults = dict(basics.items() + sensors.items() + dbUpdater.items())
+    		basics 		= dict(config.items("Basics"))
+		sensors 	= dict(config.items("Sensors"))
+		dbUpdater 	= dict(config.items("dbUpdater"))
+		pressure	= dict(config.items("Pressure"))
+		defaults 	= dict(basics.items() + sensors.items() + dbUpdater.items()+ pressure.items())
 	
 	except:
 		print 'Probably the .NMDA.conf file is not configured. The NMDA.conf.example is an example file of how to config the .NMDA.conf file'
@@ -342,9 +343,10 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 		except:
 			print 'Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.'
 			logging.info('Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.')
+	pressureConf = {'average':float(args.avg_pressure), 'beta':float(args.beta_pressure)}
 	
 	reader=FPGASerialReader(port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events)
-	counts=CountsManager(port,end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf, args.channel_avg)
+	counts=CountsManager(port,end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf, args.channel_avg, pressureConf)
 	
 	return reader, counts
 	
