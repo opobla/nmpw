@@ -22,7 +22,7 @@ def create_parser():
 
 	config = ConfigParser.SafeConfigParser()
 	try:
-    		config.read(['/server/nmpw/.NMDA.conf'])
+    		config.read(['.NMDA.conf'])
     		basics = dict(config.items("Basics"))
 		sensors = dict(config.items("Sensors"))
 		dbUpdater = dict(config.items("dbUpdater"))
@@ -205,7 +205,7 @@ def init_database(args_database):
 					'measured_corr_for_pressure' float unsigned DEFAULT NULL,\
 					'measured_pressure_mbar' float DEFAULT NULL,\
 					PRIMARY KEY ('start_date_time')\
-		)'")
+		)")
 	# Finaly return the database connection
 	return conn
 
@@ -378,6 +378,7 @@ if __name__=='__main__':
 	GPIO.output("P9_42", GPIO.HIGH)
 	
 	args=create_parser().parse_args()
+	print args
 	validate_arguments(args)
 
 	port, port_sensors, conn, sensors_manager= init_resources(args)
