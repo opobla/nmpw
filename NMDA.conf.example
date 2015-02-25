@@ -30,5 +30,11 @@ remote_db_db= nmdadb2
 
 [Pressure]
 # Average pressure for the station.
-avg_pressure=950
-beta_pressure=0.006
+avg_pressure=932
+# N=N0*exp(Beta*(P-P0))
+beta_pressure=0.0067
+
+[Efficiency]
+# corr_efficcincy = Beta * corr_pressure
+beta_efficiency=1.0
+

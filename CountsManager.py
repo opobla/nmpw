@@ -8,11 +8,12 @@ import copy
 import logging
 import numpy
 import MySQLdb
+import math
 
 from DBUpdater import DBUpdater
 
 class CountsManager(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf, channel_avg, pressureConf):
+	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf, channel_avg, pressureConf, efficiencyConf):
 		threading.Thread.__init__(self)
 		self.name			='CountsManager'
 		self.port			=port
@@ -26,6 +27,7 @@ class CountsManager(threading.Thread):
 		self.dbUpConf			=dbUpConf
 		self.channel_avg		=channel_avg
 		self.pressureConf		=pressureConf
+		self.efficiencyConf		=efficiencyConf
 		
 	@staticmethod
 	def aux (array_to_json):
@@ -121,8 +123,8 @@ class CountsManager(threading.Thread):
 	def calc_globals(self, counts, sensors_data):
 		uncorrected_min   	= self.medianAlgorithm(counts)
 		uncorrected_sec  	= uncorrected_min/60.0
-		corr_pressure_sec 	= uncorrected_sec * self.pressureConf['average'] / (sensors_data['atmPressure']/100) 
-		corr_efficiency_sec	= uncorrected_sec
+		corr_pressure_sec 	= uncorrected_sec * math.exp(self.pressureConf['beta'] * ((sensors_data['atmPressure']/100.0)-self.pressureConf['average']))
+		corr_efficiency_sec	= self.efficiencyConf['beta'] * corr_pressure_sec
 		return uncorrected_sec, corr_pressure_sec, corr_efficiency_sec
 
 	def medianAlgorithm(self, counts):
@@ -145,6 +147,7 @@ class CountsManager(threading.Thread):
 				if now_min+60 < now:   
 					counts, countsFromEvents, events		=self.getData(now_min)
 					uncorrected, corr_pressure, corr_efficiency 	=self.calc_globals(counts, sensors_data)
+					print uncorrected, corr_pressure, "		--->", now_min
 
 					self.save_counts(now_min, counts, sensors_data)
 					self.save_countsFromEvents(now_min, countsFromEvents, sensors_data)
