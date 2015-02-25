@@ -1,5 +1,8 @@
 nmpw
 ====
+    # TODO        
+    Update Flags
+    Update DBUpdater   CALM_ori 
 
 ***Python software for the new pulse width core for neutron monitors***
 
