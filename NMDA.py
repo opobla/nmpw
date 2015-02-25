@@ -22,7 +22,7 @@ def create_parser():
 
 	config = ConfigParser.SafeConfigParser()
 	try:
-    		config.read(['/server/nmpwd/NMDA.conf'])
+    		config.read(['/server/nmpw/.NMDA.conf'])
     		basics 		= dict(config.items("Basics"))
 		sensors 	= dict(config.items("Sensors"))
 		dbUpdater 	= dict(config.items("dbUpdater"))
