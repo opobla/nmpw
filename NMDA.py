@@ -52,17 +52,20 @@ def create_parser():
 	parser.set_defaults(**defaults)
 	parser.add_argument('-sp',  '--serial_port_control', help='The port that will be used to read the data.')
 	parser.add_argument('-db',  '--database', help='The database where the data will be stored, by default the data will be printed on the shell.')
-	parser.add_argument('-sps', '--serial_port_sensors', help='The port the sensors will use to deliver their data')
-	parser.add_argument('-bm',  '--barometer_type', choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement')
-	parser.add_argument('-hv',  '--hvps_type', choices=['digital','analog'],help='Analog or Digital high voltage power suplly')
-	parser.add_argument('-ahvc','--analog_hvps_corr', type=float, help='Correction coefficient for the analog hvps')
+	parser.add_argument('-sps', '--serial_port_sensors', help='The port the sensors will use to deliver their data.')
+	parser.add_argument('-bm',  '--barometer_type', choices=['ap1', 'bm35'],help='The barometer used for the pressure measurement.')
+	parser.add_argument('-hv',  '--hvps_type', choices=['digital','analog'],help='Analog or Digital high voltage power suplly.')
+	parser.add_argument('-ahvc','--analog_hvps_corr', type=float, help='Correction coefficient for the analog hvps.')
 
-	parser.add_argument('-dbU', '--db_updater_enabled')
-	parser.add_argument('-ldb', '--local_db')
+	parser.add_argument('-dbU', '--db_updater_enabled', help='Enables or disables the remote databese updater(DBUpdater).')
+	parser.add_argument('-ldb', '--local_db', help='The database the DBUpdater uses to read values from.')
 	parser.add_argument('-rh',  '--remote_db_host', help='The host where the remote dabase is.')
-	parser.add_argument('-ru',  '--remote_db_user')
-	parser.add_argument('-rp',  '--remote_db_pass')
-	parser.add_argument('-rdb', '--remote_db_db')
+	parser.add_argument('-ru',  '--remote_db_user', help='Username for the remote database host.')
+	parser.add_argument('-rp',  '--remote_db_pass', help='Password for the remote database host.')
+	parser.add_argument('-rdb', '--remote_db_db',   help='The name of the remote database.')
+
+	parser.add_argument('-apr', '--avg_pressure',   help='Average atmospheric pressure for the station.')
+
 
 	return parser
 
