@@ -32,36 +32,7 @@ class SensorsManagerTestCase(unittest.TestCase):
 		self.assertEqual(SM_instance.hvps_type, 'three')
 		self.assertEqual(SM_instance.port_control, 'four')
 		self.assertEqual(SM_instance.port_data, 'five')
-
-	def test_init_resources(self):
-		# Validate we setup a timeout for the data port when data port is present
-		SM_instance=MagicMock(spec=SensorsManager.SensorsManager)	
-		SM_instance.bar_type='hi'
-		SM_instance.hvps_type='there'
-		SM_instance.port_control=None
-		SM_instance.port_data=MagicMock()
-		SM_instance.port_data.timeout=0.0
-		SensorsManager.SensorsManager.init_resources(SM_instance)
-		self.assertNotEqual(SM_instance.port_data.timeout, 0.0)
-
-		# Validate we call ap1.init
-		ap1.ap1_init_strobe_reader.return_value=True
-		SM_instance.bar_type='ap1'
-		SM_instance.hvps_type='there'
-		SM_instance.port_control=None
-		SM_instance.port_data=None
-		SensorsManager.SensorsManager.init_resources(SM_instance)
-		ap1.ap1_init_strobe_reader.assert_called_with()
-
-		# Validate we call analogHVPS.init
-		analogHVPS.analogHVPS_init.return_value=True
-		SM_instance.bar_type='hi'
-		SM_instance.hvps_type='analog'
-		SM_instance.port_control=None
-		SM_instance.port_data=None
-		SensorsManager.SensorsManager.init_resources(SM_instance)
-		analogHVPS.analogHVPS_init.assert_called_with()
-
+	
 	def test_read_pressure_BM35(self):
 		# Returned value when bm35 barometer is specified
 		time=MagicMock()

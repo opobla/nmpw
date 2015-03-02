@@ -10,7 +10,6 @@ from bm35_tests import bm35TestCase
 from FPGASerialReader_tests import ReaderTestCase
 from SensorsManager_tests import SensorsManagerTestCase
 #from dbUpdater_tests import dbUpdaterTestCase
-#from validate_arguments_tests import validate_argumentsTestCase
 #from bbbDAQ_tests import bbbDAQTestCase
 
 def bm35_suite():
@@ -25,8 +24,6 @@ def Reader_suite():
 def CountsPettioner_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(CountsPettionerTestCase)
 
-
-
 def dbUpdater_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(dbUpdaterTestCase)
 
@@ -35,7 +32,6 @@ def bbbDAQ_suite():
 
 """
 if __name__ == '__main__':
-	#  TODO add arguments wih argparse which will allow us to test different units.
 	allTests=unittest.TestSuite()
 	allTests.addTests(bm35_suite())
 	#allTests.addTests(CountsPettioner_suite())
