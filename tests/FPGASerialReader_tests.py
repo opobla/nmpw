@@ -3,28 +3,30 @@ import mock
 from mock import MagicMock
 from mock import call
 
-from Reader import Reader
+from FPGASerialReader import FPGASerialReader
 
 class ReaderTestCase(unittest.TestCase):
 
 	def test_Constructor(self):
 		shared_counts=[]
+		shared_countsFromEvents=[]
 		shared_events=[]
-		reader=Reader('port', 'end', 'counts_condition', shared_counts, shared_events)
-		self.assertEqual(reader.name, 'Reader')
-		self.assertEqual(reader.port, 'port')
-		self.assertEqual(reader.end_condition, 'end')
-		self.assertEqual(reader.counts_condition, 'counts_condition')
-		self.assertEqual(reader.shared_counts_data, [0 for x in xrange(18)])
-		self.assertEqual(reader.shared_events_data, [[0 for x in xrange(18)],[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]])
-		self.assertEqual(reader.status, 'bytex')
+		reader=FPGASerialReader('port', 'end', 'counts_condition', shared_counts, shared_countsFromEvents, shared_events)
+		self.assertEqual(reader.name, 				'Reader')
+		self.assertEqual(reader.port, 				'port')
+		self.assertEqual(reader.end_condition, 			'end')
+		self.assertEqual(reader.counts_condition, 		'counts_condition')
+		self.assertEqual(reader.shared_counts, 			[0 for x in xrange(18)])
+		self.assertEqual(reader.shared_countsFromEvents, 	[0 for x in xrange(18)])
+		self.assertEqual(reader.shared_events,	 		[[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]])
+		self.assertEqual(reader.status, 			'bytex')
 
 	# With this test we assert that the run method ends when the end_condition is unset
 	def test_end_condition(self):
 		end_condition=MagicMock()
 		end_condition.is_set.side_effect=ReturnSequence([],False)
 		
-		reader=Reader(None, end_condition, None, [], [])
+		reader=FPGASerialReader(None, end_condition, None, [], [], [])
 		reader.run()
 		
 	# With this test we assert that we the number of bytes that are available and when there is no available bytes we read one byte, which blocks us until a byte is received.
@@ -36,7 +38,7 @@ class ReaderTestCase(unittest.TestCase):
 		port.read.return_value=None		
 		port.inWaiting.return_value='Potato'
 
-		reader=Reader(port , end_condition, None, [], [])
+		reader=FPGASerialReader(port , end_condition, None, [], [], [])
 		reader.run()
 
 		port.read.assert_called_with('Potato')
@@ -48,7 +50,7 @@ class ReaderTestCase(unittest.TestCase):
 		port.read.return_value=None		
 		port.inWaiting.return_value=0
 
-		reader=Reader(port , end_condition, None, [], [])
+		reader=FPGASerialReader(port , end_condition, None, [], [], [])
 		reader.run()
 
 		port.read.assert_called_with(1)
@@ -61,10 +63,10 @@ class ReaderTestCase(unittest.TestCase):
 		port=MagicMock()
 		port.read.side_effect=ReturnSequence([['\x3F'],['\xFF'],['\xFF']],['\x00'])	
 
-		reader=Reader(port , end_condition, None, [], [])
+		reader=FPGASerialReader(port , end_condition, None, [], [], [])
 		reader.run()
 
-		self.assertEqual(reader.shared_events_data[3],[1 for x in xrange(18)])
+		self.assertEqual(reader.shared_events[2],[1 for x in xrange(18)])
 
 	# Initial states bytex. Reading a 11xxxxxx byte is something unexpected 
 	def test_unexpected_reding(self):
@@ -77,10 +79,10 @@ class ReaderTestCase(unittest.TestCase):
 		logging=MagicMock()
 		logging.info.return_value=True
 		sys.modules['logging']=logging
-		import Reader
-		reload(Reader)
+		import FPGASerialReader
+		reload(FPGASerialReader)
 
-		reader=Reader.Reader(port , end_condition, None, [], [])
+		reader=FPGASerialReader.FPGASerialReader(port , end_condition, None, [], [], [])
 		reader.run()
 		logging.info.assert_called_with(mock.ANY)
 
@@ -93,28 +95,28 @@ class ReaderTestCase(unittest.TestCase):
 		port=MagicMock()
 		port.read.side_effect=ReturnSequence([['\x43'],['\x80'],['\xA0']],['\x00'])	
 
-		reader=Reader(port , end_condition, None, [], [])
+		reader=FPGASerialReader(port , end_condition, None, [], [], [])
 		reader.run()
 
-		self.assertEqual(reader.shared_events_data[0][3],1)
-		self.assertEqual(reader.shared_events_data[1][3][0],1)
+		self.assertEqual(reader.shared_countsFromEvents[3],1)
+		self.assertEqual(reader.shared_events[0][3][0],1)
 
 		# Lets run it again
 		end_condition.is_set.side_effect=ReturnSequence([True, True, True], False) 
 		port.read.side_effect=ReturnSequence([['\x43'],['\x80'],['\xA0']],['\x00'])
 		reader.run() 
 		
-		self.assertEqual(reader.shared_events_data[0][3],2)
-		self.assertEqual(reader.shared_events_data[1][3][0],2) 
+		self.assertEqual(reader.shared_countsFromEvents[3],2)
+		self.assertEqual(reader.shared_events[0][3][0],2) 
 		
 		# And again with different pulse width, channel.
 		end_condition.is_set.side_effect=ReturnSequence([True, True, True], False) 
 		port.read.side_effect=ReturnSequence([['\x4A'],['\x80'],['\xA8']],['\x00'])
 		reader.run() 
 		
-		self.assertEqual(reader.shared_events_data[0][10],1)
+		self.assertEqual(reader.shared_countsFromEvents[10],1)
 		# do not forget we are using 7 bits build the histogram, although the FPGA returns 12
-		self.assertEqual(reader.shared_events_data[1][10][32],1) 
+		self.assertEqual(reader.shared_events[0][10][32],1) 
 
 
 	def test_low_level_pulse(self):
@@ -124,10 +126,10 @@ class ReaderTestCase(unittest.TestCase):
 		port=MagicMock()
 		port.read.side_effect=ReturnSequence([['\x45'],['\x80'],['\x80']],['\x00'])	
 
-		reader=Reader(port , end_condition, None, [], [])
+		reader=FPGASerialReader(port , end_condition, None, [], [], [])
 		reader.run()
 
-		self.assertEqual(reader.shared_events_data[2][5], 1)
+		self.assertEqual(reader.shared_events[1][5], 1)
 
 	# For this test we will mock the port to return a sequence of 55 bytes which will represent sertant amount of channel counts. Once executed the Reader we will assert on the shared_counts_data.
 	def tests_counts(self):
@@ -144,10 +146,10 @@ class ReaderTestCase(unittest.TestCase):
                 counts_condition.notify.return_value=True
                 counts_condition.release.return_value=True
 
-		reader=Reader(port , end_condition, counts_condition, [], [])
+		reader=FPGASerialReader(port , end_condition, counts_condition, [], [], [])
 		reader.run()
 	
-		self.assertEqual(reader.shared_counts_data, [10 for x in xrange(18)])
+		self.assertEqual(reader.shared_counts, [10 for x in xrange(18)])
 		counts_condition.assert_has_calls([call.release()],any_order=False)
 		
 

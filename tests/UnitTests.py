@@ -7,7 +7,7 @@ cov.start()
 import unittest
 from bm35_tests import bm35TestCase
 #from CountsPettioner_tests import CountsPettionerTestCase
-#from Reader_tests import ReaderTestCase
+from FPGASerialReader_tests import ReaderTestCase
 from SensorsManager_tests import SensorsManagerTestCase
 #from dbUpdater_tests import dbUpdaterTestCase
 #from validate_arguments_tests import validate_argumentsTestCase
@@ -18,12 +18,13 @@ def bm35_suite():
 
 def SensorsManager_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(SensorsManagerTestCase)
+
+def Reader_suite():
+	return unittest.TestLoader().loadTestsFromTestCase(ReaderTestCase)
 """
 def CountsPettioner_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(CountsPettionerTestCase)
 
-def Reader_suite():
-	return unittest.TestLoader().loadTestsFromTestCase(ReaderTestCase)
 
 
 def dbUpdater_suite():
@@ -38,7 +39,7 @@ if __name__ == '__main__':
 	allTests=unittest.TestSuite()
 	allTests.addTests(bm35_suite())
 	#allTests.addTests(CountsPettioner_suite())
-	#allTests.addTests(Reader_suite())
+	allTests.addTests(Reader_suite())
 	allTests.addTests(SensorsManager_suite())
 	#allTests.addTests(dbUpdater_suite())
 	#allTests.addTests(bbbDAQ_suite())
