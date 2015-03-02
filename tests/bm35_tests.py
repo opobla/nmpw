@@ -5,6 +5,9 @@ sys.path.append('.')
 import BM35Driver
 
 class bm35TestCase(unittest.TestCase):
+	def setUp(self):
+		reload(BM35Driver)
+
 	def test_Equality_compute_crc(self):
 		response=BM35Driver.bm35_compute_crc('AAA')
 		self.assertEqual(response,'AAA195')
@@ -53,5 +56,3 @@ class bm35TestCase(unittest.TestCase):
 		BM35Driver.bm35_request_1min_reading_period(mock_port)
 
 		mock_port.write.assert_called_with(BM35Driver.bm35_compute_crc('A00I10')+'\r\n')
-
-
