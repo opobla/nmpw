@@ -2,6 +2,7 @@ import unittest
 import mock
 from mock import MagicMock
 from mock import call
+import sys
 
 from FPGASerialReader import FPGASerialReader
 
@@ -152,21 +153,6 @@ class ReaderTestCase(unittest.TestCase):
 		self.assertEqual(reader.shared_counts, [10 for x in xrange(18)])
 		counts_condition.assert_has_calls([call.release()],any_order=False)
 		
-
-
-import sys
-from cStringIO import StringIO
-from contextlib import contextmanager
-
-@contextmanager
-def capture(command, *args, **kwargs):
-  out, sys.stdout = sys.stdout, StringIO()
-  command(*args, **kwargs)
-  sys.stdout.seek(0)
-  yield sys.stdout.read()
-  sys.stdout = out
-
-
 
 
 class ReturnSequence(object):
