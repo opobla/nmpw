@@ -22,14 +22,6 @@ class ReaderTestCase(unittest.TestCase):
 		self.assertEqual(reader.shared_events,	 		[[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]])
 		self.assertEqual(reader.status, 			'bytex')
 
-	# With this test we assert that the run method ends when the end_condition is unset
-	def test_end_condition(self):
-		end_condition=MagicMock()
-		end_condition.is_set.side_effect=ReturnSequence([],False)
-		
-		reader=FPGASerialReader(None, end_condition, None, [], [], [])
-		reader.run()
-		
 	# With this test we assert that we the number of bytes that are available and when there is no available bytes we read one byte, which blocks us until a byte is received.
 	def test_read_one_byte(self):
 		end_condition=MagicMock()
@@ -132,7 +124,7 @@ class ReaderTestCase(unittest.TestCase):
 
 		self.assertEqual(reader.shared_events[1][5], 1)
 
-	# For this test we will mock the port to return a sequence of 55 bytes which will represent sertant amount of channel counts. Once executed the Reader we will assert on the shared_counts_data.
+	# For this test we will mock the port to return a sequence of 55 bytes which will represent sertant amount of channel counts. Once executed the Reader we will assert on the shared_counts.
 	def tests_counts(self):
 		end_condition=MagicMock()
 		end_condition.is_set.side_effect=ReturnSequence([True]*55, False)
