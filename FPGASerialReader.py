@@ -60,7 +60,6 @@ class FPGASerialReader(threading.Thread):
 			overflow_general=(ord(next[0]) & 0b00100000) >> 5
 			overflow_almost_full=(ord(next[0]) & 0b01000000) >> 6
 
-			print 'Overflow: ',self.overflow
 			self.shared_events[2][:]=map(operator.add, self.shared_events[2],self.overflow)
 			#  TODO Decide what to do with the overflow_general and almost_full data...
 			return
@@ -90,16 +89,11 @@ class FPGASerialReader(threading.Thread):
 			if self.pulse_type==1:
 				self.shared_events[0][self.channel][pulse_width_ticks>>5] +=1
 				self.shared_countsFromEvents[self.channel] +=1
-
-			#print datetime.datetime.now().time(),"Ch:",self.channel,"Pulse type:",self.pulse_type," Pulse width:",pulse_width_ticks,\
-			#	float(pulse_width_ticks) / 50.0,"useg"
 			return
-
 
 		#----------------Counts
 		if ((ord(next[0]) & 0b11100000) == 0b01100000):
 			self.status='Contbyte3'
-			print 'Counts transmision started...'
 			if self.channel_counts!=None:
 				logging.info(self.name+': Error:Error while reading the counts.')
 			self.channel_counts=0
