@@ -12,23 +12,7 @@ class SensorsManager:
 		self.port_data=port_data
 		self.analog_hvps_corr=analog_hvps_corr
 		
-		self.validate_attributes()
 		self.init_resources()
-
-			
-	def validate_attributes(self):
-		# Valid bar_type
-		if not(self.bar_type==None or self.bar_type=='ap1' or self.bar_type=='bm35'):
-			raise AttributeError('Invalid bar_type')
-
-		# Valid hvps_type
-		if not(self.hvps_type==None or self.hvps_type=='digital' or self.hvps_type=='analog'):
-			raise AttributeError('Invalid hvps_type')
-
-		# The needed port are present
-		if (self.hvps_type=='digital' or self.bar_type=='bm35') and (self.port_control==None or self.port_data==None):
-			raise AttributeError('In order to read data from a digital hvps we need two ports, one for control and one for data')
-
 	
 	def init_resources(self):
 		# Set a timeout for the data port
@@ -38,14 +22,14 @@ class SensorsManager:
 
 	 	# Init the context for ap1
 		if self.bar_type=='ap1':
-			ap1.ap1_init_strobe_reader()
+			AP1Driver.ap1_init_strobe_reader()
 
 		# Init the context for analog barometers
 		if self.hvps_type=='analog':
-			analogHVPS.analogHVPS_init()
+			HVPSDriver.analogHVPS_init()
 
 		if self.bar_type=='bm35':
-			bm35.bm35_request_1min_reading_period(self.port_data)
+			BM35Driver.bm35_request_1min_reading_period(self.port_data)
 
 
 
@@ -57,12 +41,12 @@ class SensorsManager:
 			self.port_control.write('\x00')
 			time.sleep(0.5)
 			self.port_data.flush()
-			bm35.bm35_request_pressure_reading(self.port_data)
+			BM35Driver.bm35_request_pressure_reading(self.port_data)
 			pressure_raw=self.port_data.readline()
-			pressure=bm35.bm35_parse_pressure_answer(pressure_raw)
+			pressure=BM35Driver.bm35_parse_pressure_answer(pressure_raw)
 			return pressure['meanPressure']
 		if self.bar_type=='ap1':
-			pressure=ap1.ap1_read_pressure_using_strobe()
+			pressure=AP1Driver.ap1_read_pressure_using_strobe()
 			return pressure
 
 	def read_hvps(self):
@@ -93,7 +77,7 @@ class SensorsManager:
 			# We can only read three digital hvps, so we return a -1 for the fourth one.
 			return hvps1, hvps2, hvps3, -1
 		if self.hvps_type=='analog':
-			return analogHVPS.analogHVPS_read(self.analog_hvps_corr)
+			return HVPSDriver.analogHVPS_read(self.analog_hvps_corr)
 
 
 	def read_temp(self):

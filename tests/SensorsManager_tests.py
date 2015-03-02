@@ -6,9 +6,9 @@ import sys
 sys.path.append('.')
 
 ap1=MagicMock()
-sys.modules['ap1'] = ap1
+sys.modules['AP1Driver'] = ap1
 analogHVPS=MagicMock()
-sys.modules['analogHVPS']=analogHVPS
+sys.modules['HVPSDriver']=analogHVPS
 
 import SensorsManager
 
@@ -17,6 +17,7 @@ class SensorsManagerTestCase(unittest.TestCase):
 		reload(SensorsManager)
 		
 	def test_Constructor(self):
+		#Tests the correct order of constructors parameters.
 		aux=MagicMock()
 		aux.validate_attributes.return_value=True
 		aux.init_resources.return_value=True
@@ -31,49 +32,6 @@ class SensorsManagerTestCase(unittest.TestCase):
 		self.assertEqual(SM_instance.hvps_type, 'three')
 		self.assertEqual(SM_instance.port_control, 'four')
 		self.assertEqual(SM_instance.port_data, 'five')
-		
-		aux.assert_has_calls([call.validate_attributes(), call.init_resources()], any_order=False)
-	
-	def test_validate_attributes(self):
-		aux=MagicMock()
-		aux.init_resources.return_value=True
-		SensorsManager.SensorsManager.init_resources=aux.init_resources
-
-		# A valis set of attributes, we expect no error will be raised
-		SM_instance=SensorsManager.SensorsManager('The_mane', 'bm35', 'digital', 'Something not null', 'Something not null')
-
-		# Another set of valud attributes
-		SM_instance=SensorsManager.SensorsManager('The_name', 'ap1', 'analog', None, None)
-
-		# Another set of valud attributes
-		SM_instance=SensorsManager.SensorsManager('The_name', 'ap1', 'digital', 'Something not null', 'Something not null')
-
-		# Invalid sets of data. Error should be raised
-		SM_instance=MagicMock(spec=SensorsManager.SensorsManager)	
-		SM_instance.bar_type='hi'
-		SM_instance.hvps_type='there'
-		SM_instance.port_control=None
-		SM_instance.port_data=None
-		self.assertRaises(AttributeError, SensorsManager.SensorsManager.validate_attributes, SM_instance)
-
-		SM_instance.bar_type='bm35'
-		SM_instance.hvps_type='there'
-		SM_instance.port_control=None
-		SM_instance.port_data=None
-		self.assertRaises(AttributeError, SensorsManager.SensorsManager.validate_attributes, SM_instance)
-
-		SM_instance.bar_type='bm35'
-		SM_instance.hvps_type='analog'
-		SM_instance.port_control=None
-		SM_instance.port_data=None
-		self.assertRaises(AttributeError, SensorsManager.SensorsManager.validate_attributes, SM_instance)
-
-		SM_instance.bar_type='ap1'
-		SM_instance.hvps_type='digital'
-		SM_instance.port_control=None
-		SM_instance.port_data=None
-		self.assertRaises(AttributeError, SensorsManager.SensorsManager.validate_attributes, SM_instance)
-
 
 	def test_init_resources(self):
 		# Validate we setup a timeout for the data port when data port is present
@@ -126,10 +84,10 @@ class SensorsManagerTestCase(unittest.TestCase):
 		read_pressure=SM_instance.read_pressure()
 		self.assertEqual(read_pressure, 85661)
 
-		# Returned value when ap1 barometer is specfied
+		# Returned value when ap1 barometer is specified
 		ap1=MagicMock()
 		ap1.ap1_read_pressure_using_strobe.return_value=88888	
-		sys.modules['ap1']=ap1
+		sys.modules['AP1Driver']=ap1
 		reload(SensorsManager)
 
 		SM_instance=SensorsManager.SensorsManager('The_name', 'ap1', None, None, None)
