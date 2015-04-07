@@ -88,7 +88,7 @@ class CountsManager(threading.Thread):
 			print '\nstart_date_time:',time_entry,'\nuncorrected', uncorrected,'\ncorr_pressure:',corr_pressure,'\ncorr_efficiency:',corr_efficiency
 		else:
 			sql="insert into CALM_ori (start_date_time, length_time_interval_s, measured_uncorrected, measured_corr_for_efficiency, measured_corr_for_pressure, measured_pressure_mbar) values (?, ?, ?, ?, ?, ?)"
-			self.database_adapter.execute(sql, [time_entry, 60, uncorrected, corr_efficiency, corr_pressure, sensors['atmPressure']])
+			self.database_adapter.execute(sql, [time_entry, 60, uncorrected, corr_efficiency, corr_pressure, sensors['atmPressure']/100.0])
 			self.database_adapter.commit()
 
 	@staticmethod

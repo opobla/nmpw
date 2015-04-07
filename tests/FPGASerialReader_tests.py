@@ -124,7 +124,7 @@ class ReaderTestCase(unittest.TestCase):
 
 		self.assertEqual(reader.shared_events[1][5], 1)
 
-	# For this test we will mock the port to return a sequence of 55 bytes which will represent sertant amount of channel counts. Once executed the Reader we will assert on the shared_counts.
+	# For this test we will mock the port to return a sequence of 55 bytes which will represent certaint amount of channel counts. Once executed the Reader we will assert on the shared_counts.
 	def tests_counts(self):
 		end_condition=MagicMock()
 		end_condition.is_set.side_effect=ReturnSequence([True]*55, False)
