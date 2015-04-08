@@ -34,5 +34,5 @@ while True:
 		cont		= 0
 		curr_last	= get_last()
 		if curr_last == last_data:
-			break
+			time.sleep(120)			#This will reset the board
 		last_data 	= curr_last
