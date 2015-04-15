@@ -4,10 +4,14 @@ import NMDA
 import sqlite3
 
 def get_last():
-	cursor = conn_local.cursor()
-	cursor.execute("SELECT max(start_date_time) FROM binTable")
-	row = cursor.fetchone()
-	last_data=row[0]
+	try:
+		cursor = conn_local.cursor()
+		cursor.execute("SELECT max(start_date_time) FROM binTable")
+		row = cursor.fetchone()
+		last_data=row[0]
+	except:
+		lat_data=None
+
 	if last_data==None:
 		last_data='2000-01-01 00:00:00'
 	else:
