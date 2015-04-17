@@ -1,3 +1,4 @@
+import Adafruit_BBIO.UART as UART
 import Adafruit_BBIO.GPIO as GPIO
 import logging
 import argparse
@@ -312,6 +313,8 @@ def init_remote_database(dbUpConf):
 
 
 def init_resources(args):
+	UART.setup("UART1")
+	UART.setup("UART2")
 	# Initialize the Serial Port
 	port=init_port(args.serial_port_control, args_baudrate=921600)
 
