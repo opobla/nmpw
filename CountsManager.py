@@ -55,7 +55,7 @@ class CountsManager(threading.Thread):
 		# TODO you left it here......
 		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
-			print 'start_date_time:', time_entry, 'Counts:', binTable, 'Sensors:', sensors
+			print 'start_date_time:', time_entry, 'Counts:', counts, 'Sensors:', sensors
 		else:
 			sql="INSERT INTO binTable (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 			self.database_adapter.execute(sql, [time_entry]+ counts +[sensors['hv1'], sensors['hv2'], sensors['hv3'], sensors['hv4'], sensors['temp_1'], sensors['temp_2'], sensors['atmPressure']])
@@ -65,7 +65,7 @@ class CountsManager(threading.Thread):
 	def save_countsFromEvents(self, now_min, countsFromEvents, sensors):
 		time_entry=datetime.datetime.fromtimestamp(now_min).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
-			print 'start_date_time:', time_entry, 'CountsFromEvents:', binTableFromEvents, 'Sensors:', sensors
+			print 'start_date_time:', time_entry, 'CountsFromEvents:', countsFromEvents, 'Sensors:', sensors
 		else:
 			sql="INSERT INTO binTableFromEvents (start_date_time, ch01, ch02, ch03, ch04, ch05, ch06, ch07, ch08, ch09, ch10, ch11, ch12, ch13, ch14, ch15, ch16, ch17, ch18, hv1, hv2, hv3, hv4, temp_1, temp_2, atmPressure) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 			self.database_adapter.execute(sql, [time_entry]+ countsFromEvents +[sensors['hv1'], sensors['hv2'], sensors['hv3'], sensors['hv4'], sensors['temp_1'], sensors['temp_2'], sensors['atmPressure']])
@@ -75,7 +75,7 @@ class CountsManager(threading.Thread):
 	def save_events(self, now_min, events):
 		time_entry=datetime.datetime.fromtimestamp(now_min-540).strftime('%Y-%m-%d %H:%M:%S')
 		if self.database_adapter==None:
-			print '\nstart_date_time:',time_entry,'\nhistograms:',events_data[1],'\nlowlevels:',events_data[2],'\noverflows:',events_data[3]
+			print '\nstart_date_time:',time_entry,'\nhistograms:',events[0],'\nlowlevels:',events[1],'\noverflows:',events[2]
 		else:
 			sql="insert into EventsInfo10Mins (start_date_time, overflows, lowLevels, ch01Histo, ch02Histo, ch03Histo, ch04Histo, ch05Histo, ch06Histo, ch07Histo, ch08Histo, ch09Histo, ch10Histo, ch11Histo, ch12Histo, ch13Histo, ch14Histo, ch15Histo, ch16Histo, ch17Histo, ch18Histo) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 			self.database_adapter.execute(sql, [time_entry, self.aux(events[2]), self.aux(events[1])] + [self.aux(x) for x in events[0]])
