@@ -22,7 +22,7 @@ def create_parser():
 
 	config = ConfigParser.SafeConfigParser()
 	try:
-    		config.read(['/server/nmpw/.NMDA.conf'])
+    		config.read(['/server/nmda/.NMDA.conf'])
     		basics 		= dict(config.items("Basics"))
 		sensors 	= dict(config.items("Sensors"))
 		dbUpdater 	= dict(config.items("dbUpdater"))
@@ -360,7 +360,7 @@ def start_threads(reader, counts):
 	counts.start()
 
 def end_threads(reader, counts):
-	reader.join()
+	reader._Thread__stop()
 	counts._Thread__stop()
 
 def release_resources(port, port_sensors, conn):
