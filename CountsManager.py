@@ -34,7 +34,7 @@ class CountsManager(threading.Thread):
 		b=json.dumps(array_to_json)
 		return b 
 
-	#return a copy of the argument and resets he argument
+	#return a copy of the argument and resets the argument
 	@staticmethod
 	def copy_and_reset(data):
 		the_copy=copy.deepcopy(data)

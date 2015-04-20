@@ -9,7 +9,7 @@ from bm35_tests import bm35TestCase
 #from CountsPettioner_tests import CountsPettionerTestCase
 from FPGASerialReader_tests import ReaderTestCase
 from SensorsManager_tests import SensorsManagerTestCase
-#from dbUpdater_tests import dbUpdaterTestCase
+from DBUpdater_tests import DBUpdaterTestCase
 #from bbbDAQ_tests import bbbDAQTestCase
 
 def bm35_suite():
@@ -20,12 +20,13 @@ def SensorsManager_suite():
 
 def Reader_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(ReaderTestCase)
+
+def DBUpdater_suite():
+	return unittest.TestLoader().loadTestsFromTestCase(DBUpdaterTestCase)
+
 """
 def CountsPettioner_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(CountsPettionerTestCase)
-
-def dbUpdater_suite():
-	return unittest.TestLoader().loadTestsFromTestCase(dbUpdaterTestCase)
 
 def bbbDAQ_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(bbbDAQTestCase)
@@ -37,7 +38,7 @@ if __name__ == '__main__':
 	#allTests.addTests(CountsPettioner_suite())
 	allTests.addTests(Reader_suite())
 	allTests.addTests(SensorsManager_suite())
-	#allTests.addTests(dbUpdater_suite())
+	allTests.addTests(DBUpdater_suite())
 	#allTests.addTests(bbbDAQ_suite())
 	
 	unittest.TextTestRunner(verbosity=2).run(allTests)
