@@ -6,11 +6,10 @@ import operator
 import logging
 
 class FPGASerialReader(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events):
+	def __init__(self, port, counts_condition, shared_counts, shared_countsFromEvents, shared_events):
 		threading.Thread.__init__(self)
 		self.name='Reader'
 		self.port=port
-		self.end_condition=end_condition
 		self.counts_condition=counts_condition
 		self.shared_counts=shared_counts
 		self.shared_countsFromEvents=shared_countsFromEvents
@@ -138,7 +137,7 @@ class FPGASerialReader(threading.Thread):
 
 
 	def run(self):
-		while self.end_condition.is_set():
+		while True:
 			aux= self.port.inWaiting()
 			if aux==0:
 				aux=1

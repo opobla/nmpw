@@ -332,9 +332,6 @@ def init_resources(args):
 
 def init_threads(port, args, port_sensors, conn, sensors_manager):
 	# Initialize all threads
-	end_condition=threading.Event()
-	end_condition.set()
-
 	counts_condition=threading.Lock()
 	counts_condition.acquire()
 	shared_counts		=[]
@@ -353,8 +350,8 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 	pressureConf 	= {'average':float(args.avg_pressure), 'beta':float(args.beta_pressure)}
 	efficiencyConf	= {'beta':float(args.beta_efficiency)}
 	
-	reader=FPGASerialReader(port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events)
-	counts=CountsManager(port,end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf, args.channel_avg, pressureConf, efficiencyConf)
+	reader=FPGASerialReader(port, counts_condition, shared_counts, shared_countsFromEvents, shared_events)
+	counts=CountsManager(port, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf, args.channel_avg, pressureConf, efficiencyConf)
 	
 	return reader, counts
 	
@@ -396,17 +393,16 @@ if __name__=='__main__':
 	reader, counts= init_threads(port, args, port_sensors, conn, sensors_manager)
 	start_threads(reader, counts)
 	
-	#For now this allows us to stop the threads relising the resources
+	end_condition=threading.Event()
+	end_condition.set()
 	def signal_handler(signal, frame):
 		logging.info('End requested')
 		print 'Bye Bye'
-		reader.end_condition.clear()
+		end_condition.clear()
 	signal.signal(signal.SIGINT,signal_handler)
-
-	while reader.end_condition.is_set():
+	while end_condition.is_set():
 		time.sleep(100000000000)
 
 	end_threads(reader, counts)
 	release_resources(port, port_sensors, conn)
-
 	logging.info('Correctly ended. bye')
