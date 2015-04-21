@@ -146,7 +146,6 @@ class CountsManager(threading.Thread):
 				if now_min+60 < now:   
 					counts, countsFromEvents, events		=self.getData(now_min)
 					uncorrected, corr_pressure, corr_efficiency 	=self.calc_globals(counts, sensors_data)
-					print uncorrected, corr_pressure, "		--->", now_min
 
 					self.save_counts(now_min, counts, sensors_data)
 					self.save_countsFromEvents(now_min, countsFromEvents, sensors_data)

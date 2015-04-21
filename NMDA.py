@@ -385,7 +385,6 @@ if __name__=='__main__':
 	GPIO.output("P9_42", GPIO.HIGH)
 	
 	args=create_parser().parse_args()
-	print args
 	validate_arguments(args)
 
 	port, port_sensors, conn, sensors_manager= init_resources(args)
