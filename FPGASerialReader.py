@@ -16,11 +16,6 @@ class FPGASerialReader(threading.Thread):
 		self.shared_events=shared_events
 
 		self.status='bytex'
-		self.histo_data=[[0 for x in xrange(128)] for x in xrange(18)]
-		self.events_min=[0 for x in xrange(18)]
-		self.low_events=[0 for x in xrange(18)]
-		self.overflows=[0 for x in xrange(18)]
-
 		self.shared_counts[:]			=[0 for x in xrange(18)]
 		self.shared_countsFromEvents[:]		=[0 for x in xrange(18)]
 		self.shared_events[:]			=[[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
