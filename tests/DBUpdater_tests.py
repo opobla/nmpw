@@ -7,6 +7,7 @@ import sqlite3
 import MySQLdb
 
 class DBUpdaterTestCase(unittest.TestCase):
+	# This is not an unittest. Its an integration tests so it will fail when runed on other machines.In fail case this test must be ignored.
 	def test_all_in_one(self):
 		# Init the config
 		dbUpConf={'name':'Lolz the name', 'local':{'name':'/server/trash/test.db'}, 'remote':{'host':'localhost', 'user':'root', 'pass':'', 'database':'nmdadb_tests'}}
