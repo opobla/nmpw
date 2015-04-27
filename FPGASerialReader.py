@@ -6,22 +6,16 @@ import operator
 import logging
 
 class FPGASerialReader(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events):
+	def __init__(self, port, counts_condition, shared_counts, shared_countsFromEvents, shared_events):
 		threading.Thread.__init__(self)
 		self.name='Reader'
 		self.port=port
-		self.end_condition=end_condition
 		self.counts_condition=counts_condition
 		self.shared_counts=shared_counts
 		self.shared_countsFromEvents=shared_countsFromEvents
 		self.shared_events=shared_events
 
 		self.status='bytex'
-		self.histo_data=[[0 for x in xrange(128)] for x in xrange(18)]
-		self.events_min=[0 for x in xrange(18)]
-		self.low_events=[0 for x in xrange(18)]
-		self.overflows=[0 for x in xrange(18)]
-
 		self.shared_counts[:]			=[0 for x in xrange(18)]
 		self.shared_countsFromEvents[:]		=[0 for x in xrange(18)]
 		self.shared_events[:]			=[[[0 for x in xrange(128)] for x in xrange(18)],[0 for x in xrange(18)],[0 for x in xrange(18)]]
@@ -138,7 +132,7 @@ class FPGASerialReader(threading.Thread):
 
 
 	def run(self):
-		while self.end_condition.is_set():
+		while True:
 			aux= self.port.inWaiting()
 			if aux==0:
 				aux=1

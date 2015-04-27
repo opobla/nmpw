@@ -13,11 +13,10 @@ import math
 from DBUpdater import DBUpdater
 
 class CountsManager(threading.Thread):
-	def __init__(self, port, end_condition, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf, channel_avg, pressureConf, efficiencyConf):
+	def __init__(self, port, counts_condition, shared_counts, shared_countsFromEvents, shared_events, database_adapter, sensors_manager, dbUpConf, channel_avg, pressureConf, efficiencyConf):
 		threading.Thread.__init__(self)
 		self.name			='CountsManager'
 		self.port			=port
-		self.end_condition		=end_condition
 		self.counts_condition		=counts_condition
 		self.shared_counts		=shared_counts
 		self.shared_countsFromEvents	=shared_countsFromEvents
@@ -34,7 +33,7 @@ class CountsManager(threading.Thread):
 		b=json.dumps(array_to_json)
 		return b 
 
-	#return a copy of the argument and resets he argument
+	#return a copy of the argument and resets the argument
 	@staticmethod
 	def copy_and_reset(data):
 		the_copy=copy.deepcopy(data)
@@ -137,7 +136,7 @@ class CountsManager(threading.Thread):
 
 	def run(self):
 		now_min=None
-		while self.end_condition.is_set():
+		while True:
 			now=time.time()
 			if now_min==None:
 				now_min=self.get_min(now)
@@ -147,7 +146,6 @@ class CountsManager(threading.Thread):
 				if now_min+60 < now:   
 					counts, countsFromEvents, events		=self.getData(now_min)
 					uncorrected, corr_pressure, corr_efficiency 	=self.calc_globals(counts, sensors_data)
-					print uncorrected, corr_pressure, "		--->", now_min
 
 					self.save_counts(now_min, counts, sensors_data)
 					self.save_countsFromEvents(now_min, countsFromEvents, sensors_data)

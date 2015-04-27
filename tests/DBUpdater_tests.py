@@ -2,18 +2,19 @@ import unittest
 from mock import MagicMock
 import sys
 sys.path.append('.')
-import dbUpdater
+import DBUpdater
 import sqlite3
 import MySQLdb
 
-class dbUpdaterTestCase(unittest.TestCase):
+class DBUpdaterTestCase(unittest.TestCase):
+	# This is not an unittest. Its an integration tests so it will fail when runed on other machines.In fail case this test must be ignored.
 	def test_all_in_one(self):
 		# Init the config
-		dbUpConf={'name':'Lolz the name', 'local':{'name':'/server/trash/test.db'}, 'remote':{'host':'localhost', 'user':'hristo', 'pass':'pass', 'database':'nmdadb_tests'}}
+		dbUpConf={'name':'Lolz the name', 'local':{'name':'/server/trash/test.db'}, 'remote':{'host':'localhost', 'user':'root', 'pass':'', 'database':'nmdadb_tests'}}
 
 		# Create the sqlite database and push some data to binTable.....
 		conn = sqlite3.connect(dbUpConf['local']['name'], check_same_thread=False)
-		conn.execute("drop table binTable;")
+		conn.execute("drop table if exists binTable;")
 		conn.execute("CREATE TABLE IF NOT EXISTS 'binTable' (\
 			 'start_date_time' datetime NOT NULL,\
 			 'ch01' int(11) DEFAULT NULL,\
@@ -94,8 +95,8 @@ class dbUpdaterTestCase(unittest.TestCase):
 		)")
 
 
-		# Once created the two databases we call the dbUpdater
-		the_dbUpdater=dbUpdater.dbUpdater(dbUpConf)
+		# Once created the two databases we call the DBUpdater
+		the_dbUpdater=DBUpdater.DBUpdater(dbUpConf)
 		the_dbUpdater.start()
 		the_dbUpdater.join()
 
@@ -123,10 +124,9 @@ class dbUpdaterTestCase(unittest.TestCase):
 		some_data.extend(some_new_data)
 
 
-		the_dbUpdater=dbUpdater.dbUpdater(dbUpConf)
+		the_dbUpdater=DBUpdater.DBUpdater(dbUpConf)
 		the_dbUpdater.start()
 		the_dbUpdater.join()
-
 
 		cur.execute("select * from binTable;")
 		count=0
