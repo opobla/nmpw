@@ -158,13 +158,13 @@ class CountsManager(threading.Thread):
 					self.update_remote()
 					sensors_data=self.read_sensors()
 					## TODO Remove. The workaround of not having a barometer
-					conn_remote = MySQLdb.connect(	host	= self.dbUpConf['remote']['host'], # your host, usually localhost
-				 					user	= self.dbUpConf['remote']['user'], # your username
-									passwd	= self.dbUpConf['remote']['pass'], # your password
-									db	= 'nmdadb') # name of the data base
-					remote_cursor = conn_remote.cursor()
-					remote_cursor.execute("SELECT atmPressure FROM binTable ORDER BY start_date_time DESC LIMIT 1")
-					sensors_data['atmPressure'] = remote_cursor.fetchone()[0]
+					#conn_remote = MySQLdb.connect(	host	= self.dbUpConf['remote']['host'], # your host, usually localhost
+				 	#				user	= self.dbUpConf['remote']['user'], # your username
+					#				passwd	= self.dbUpConf['remote']['pass'], # your password
+					#				db	= 'nmdadb') # name of the data base
+					#remote_cursor = conn_remote.cursor()
+					#remote_cursor.execute("SELECT atmPressure FROM binTable ORDER BY start_date_time DESC LIMIT 1")
+					#sensors_data['atmPressure'] = remote_cursor.fetchone()[0]
 					## TODO Remove. The workaround of not having a barometer
 					now_min=self.get_min(now)
 				else:
