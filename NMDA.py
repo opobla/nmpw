@@ -12,6 +12,9 @@ import sqlite3
 import MySQLdb
 import signal
 import sys
+import Queue
+from K3.protocol.Decoder import Decoder
+from K3.protocol.Analyzer import Analyzer
 
 from FPGASerialReader import FPGASerialReader
 from CountsManager import CountsManager
@@ -103,9 +106,6 @@ def end(error_msg):
 	logging.info('Argument validator: '+error_msg)
 	logging.info('Exiting')
 	raise AttributeError(error_msg)
-
-
-
 
 def init_port(args_port, args_baudrate):
 	if args_port != None:
@@ -310,8 +310,6 @@ def init_remote_database(dbUpConf):
 				PRIMARY KEY (start_date_time)\
 	)")
 
-
-
 def init_resources(args):
 	UART.setup("UART1")
 	UART.setup("UART2")
@@ -320,7 +318,8 @@ def init_resources(args):
 
 	# Initialize the Serial Port for the barometer if one is needed.
 	#  TODO Pass the sps baudrate as parameter or leave it as it is now
-	port_sensors=init_port(args.serial_port_sensors, args_baudrate=2400) #  TODO change the baudrate
+	#  TODO change the baudrate
+	port_sensors=init_port(args.serial_port_sensors, args_baudrate=2400)
 
 	# Initialize the Database connection
 	conn=init_database(args.database)
@@ -332,11 +331,6 @@ def init_resources(args):
 
 def init_threads(port, args, port_sensors, conn, sensors_manager):
 	# Initialize all threads
-	counts_condition=threading.Lock()
-	counts_condition.acquire()
-	shared_counts		=[]
-	shared_countsFromEvents	=[]
-	shared_events		=[]
 
 	dbUpConf=None
 	if args.db_updater_enabled==True:
@@ -349,19 +343,21 @@ def init_threads(port, args, port_sensors, conn, sensors_manager):
 			logging.info('Could not correctly init the remote database, but  the data acquisition software will continue as expected. The software will anyway try to write the data to the remote database every minute.')
 	pressureConf 	= {'average':float(args.avg_pressure), 'beta':float(args.beta_pressure)}
 	efficiencyConf	= {'beta':float(args.beta_efficiency)}
-	
-	reader=FPGASerialReader(port, counts_condition, shared_counts, shared_countsFromEvents, shared_events)
-	counts=CountsManager(port, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf, args.channel_avg, pressureConf, efficiencyConf)
-	
-	return reader, counts
-	
-def start_threads(reader, counts):
-	reader.start()
-	counts.start()
 
-def end_threads(reader, counts):
-	reader._Thread__stop()
-	counts._Thread__stop()
+	queue=Queue.Queue()
+	reader=FPGASerialReader(port, queue)
+	decoder=Decoder(queue,Analyzer())
+	#counts=CountsManager(port, counts_condition, shared_counts, shared_countsFromEvents, shared_events, conn, sensors_manager, dbUpConf, args.channel_avg, pressureConf, efficiencyConf)
+	
+	return reader, decoder
+	
+def start_threads(threads):
+	for thread in threads:
+		thread.start()
+
+def end_threads(threads):
+	for thread in threads:
+		thread._Thread__stop()
 
 def release_resources(port, port_sensors, conn):
 	port.close()
@@ -389,8 +385,8 @@ if __name__=='__main__':
 
 	port, port_sensors, conn, sensors_manager= init_resources(args)
 
-	reader, counts= init_threads(port, args, port_sensors, conn, sensors_manager)
-	start_threads(reader, counts)
+	threads= init_threads(port, args, port_sensors, conn, sensors_manager)
+	start_threads(threads)
 	
 	end_condition=threading.Event()
 	end_condition.set()
@@ -402,6 +398,7 @@ if __name__=='__main__':
 	while end_condition.is_set():
 		time.sleep(100000000000)
 
-	end_threads(reader, counts)
+	end_threads(threads)
+
 	release_resources(port, port_sensors, conn)
 	logging.info('Correctly ended. bye')

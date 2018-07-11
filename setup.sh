@@ -1,10 +1,7 @@
-!#/bin/bash
+#!/bin/bash
 
-mkdir -p /server/logs
-mkdir -p /server/data
-
-
-git clone http://github.com/opobla/nmpw /server
+[ -d ../logs ] || mkdir -p ../logs
+[ -d ../data ] || mkdir -p ../data
 
 apt-get install python-MySQLdb ntp
 

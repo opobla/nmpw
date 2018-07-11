@@ -1,4 +1,5 @@
 from bitarray import bitarray
+import pdb
 
 class Analyzer:
 
@@ -6,6 +7,7 @@ class Analyzer:
         self.lastStep=0
         self.lastChannel=bitarray(18)
         self.statusBuffer={}
+        self.nsPerStep=20
         
 
     def process(self,step,channel):
@@ -18,25 +20,26 @@ class Analyzer:
         lastChangeIndex=0
         for i in range(0,changes.count()):
             index=changes.index(True,lastChangeIndex)
+            channelKey='ch%02d' % (18-index)
             if (channel[index]):
                 status="ON"
-                self.statusBuffer={ 'ch%02d' % (18-index):\
-                        { 'separation': step-self.lastStep}}
+                if not(channelKey in self.statusBuffer):
+                    continue
+                lastOff=self.statusBuffer[channelKey]['lastOff']
+                self.statusBuffer[channelKey]['separation']=(step-lastOff)*self.nsPerStep
+
             else:
-                if not('ch%02d' % (18-index) in self.statusBuffer):
-                    return
-
                 status="OFF"
-                self.statusBuffer['ch%02d' % (18-index)]['width']=step-self.lastStep
-                print 'ch%02d' % (18-index), self.statusBuffer['ch%02d' % (18-index)]
+                if not(channelKey in self.statusBuffer):
+                    self.statusBuffer[channelKey]={}
+                    self.statusBuffer[channelKey]['lastOff']=step
+                    continue
 
+                self.statusBuffer[channelKey]['width']=(step-self.lastStep)*self.nsPerStep
+                self.statusBuffer[channelKey]['lastOff']=step
+                print channelKey, self.statusBuffer[channelKey]
 
             lastChangeIndex=lastChangeIndex+1
-
-        print str(self.lastStep) + "-" + str(step) + "\t" +\
-            "DeltaT=" + str(step-self.lastStep) + "\t" +\
-            self.lastChannel.to01() + "-" + channel.to01() + "\t" \
-            "Xor=" + changes.to01()
 
         self.lastStep=step
         self.lastChannel=channel

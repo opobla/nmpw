@@ -1,11 +1,15 @@
 from bitarray import bitarray
+import threading
 
-class Decoder:
+class Decoder(threading.Thread):
 
-    def __init__(self,analyzer):
+    def __init__(self,queue,analyzer):
+        threading.Thread.__init__(self)
+        self.name="Decoder"
         self.channel=bitarray(18)
         self.status='Ovbyte0'
         self.analyzer=analyzer
+        self.queue=queue
 
     def process(self, next):
         if self.status=='Ovbyte0' and  ((next & 0b11100000)==0b01100000):
@@ -39,3 +43,10 @@ class Decoder:
 
         raise NameError('Invalid sequence ' + str(next) + " while in "
                 +self.status )
+
+    def run(self):
+        while True:
+            while not self.queue.empty():
+                byte=self.queue.get()
+                self.process(byte)
+
