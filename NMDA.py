@@ -9,7 +9,7 @@ import time
 import threading
 import serial
 import sqlite3
-import MySQLdb
+#import MySQLdb
 import sys
 
 from fpga_k1_serialreader import FpgaK1SerialReader
@@ -426,7 +426,7 @@ if __name__ == '__main__':
             'hv3': 999,
             'hv4': 999,
             'temp_1': sensors.get_temperature(),
-            'temp_2': 999,
+            'temp_2': sensors.get_relative_humidity(),
             'atmPressure': sensors.get_pressure()
         }
         print environment
